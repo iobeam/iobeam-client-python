@@ -1,10 +1,13 @@
 from .endpoints import devices
+from .endpoints import exports
 from .endpoints import imports
-from .resources import device
 from .resources import data
+from .resources import device
+from .resources import query
 
 DataPoint = data.DataPoint
 DataSeries = data.DataSeries
+Query = query.Query
 
 class Iobeam(object):
 
@@ -46,7 +49,7 @@ class Iobeam(object):
 
         if seriesName not in self._dataset:
             self._dataset[seriesName] = set()
-        self._dataset[seriesName].add(d)
+        self._dataset[seriesName].add(datapoint)
 
     def addDataSeries(self, dataseries):
         if dataseries is None:
@@ -71,3 +74,28 @@ class Iobeam(object):
         did = self._activeDevice.deviceId
         dataset = self._dataset
         return self._importService.importData(pid, did, dataset)
+
+    '''
+    Performs a query on the iobeam backend.
+
+    The Query specifies the project, device, and series to look up, as well
+    as any parameters to use.
+
+    Params:
+        token - A token with read access for the given project.
+        query - Specifies a data query to perform.
+
+    Returns:
+        A dictionary representing the results of the query.
+    '''
+    @staticmethod
+    def query(token, query):
+        if token is None:
+            raise ValueError("token cannot be None")
+        elif query is None:
+            raise ValueError("query cannot be None")
+        elif not isinstance(query, Query):
+            raise ValueError("query must be a iobeam.resources.query.Query")
+
+        service = exports.ExportService(token)
+        return service.getData(query)

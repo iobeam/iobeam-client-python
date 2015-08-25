@@ -25,10 +25,11 @@ class Request(object):
     def __init__(self, method, url):
         self.method = method
         self.url = url
-        self.headers = dict()
+        self.headers = {}
         self.header("User-Agent", "iobeam python")
         self.resp = None
         self.body = None
+        self.params = {}
 
     def header(self, key, value):
         self.headers[key] = value
@@ -41,12 +42,16 @@ class Request(object):
         self.body = body
         return self
 
+    def setParam(self, key, value):
+        self.params[key] = value
+        return self
+
     def execute(self):
         self.resp = None
         if self.method == "GET":
-            self.resp = requests.get(self.url, headers=self.headers)
+            self.resp = requests.get(self.url, params=self.params, headers=self.headers)
         elif self.method == "POST":
-            self.resp = requests.post(self.url, json=self.body, headers=self.headers)
+            self.resp = requests.post(self.url, params=self.params, headers=self.headers, json=self.body)
         else:
             print("unsupported method")
 
