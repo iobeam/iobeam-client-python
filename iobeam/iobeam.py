@@ -68,6 +68,11 @@ class Iobeam(object):
         This client object (allows for chaining)
     '''
     def registerDevice(self, deviceId=None, deviceName=None):
+        if self._activeDevice is None:
+            return self
+        if self._activeDevice.deviceId == deviceId:
+            return self
+
         device = self._deviceService.registerDevice(self.projectId,
             deviceId=deviceId, deviceName=deviceName)
         self._setActiveDevice(device)
