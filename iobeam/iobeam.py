@@ -39,19 +39,17 @@ class Iobeam(object):
         self._path = path
         self._dataset = {}
 
+        self._activeDevice = None
         if deviceId is not None:
             self._setActiveDevice(device.Device(projectId, deviceId, None))
-        else:
-            if self._path is not None:
-                p = os.path.join(self._path, DEVICE_ID_FILE)
-                if os.path.isfile(p):
-                    with open(p, "r") as f:
-                        did = f.read()
+        elif self._path is not None:
+            p = os.path.join(self._path, DEVICE_ID_FILE)
+            if os.path.isfile(p):
+                with open(p, "r") as f:
+                    did = f.read()
+                    if len(did) > 0:
                         self._activeDevice = device.Device(projectId, did, None)
-                else:
-                    self._activeDevice = None
-            else:
-                self._activeDevice = None
+
 
         # Setup services
         self._deviceService = devices.DeviceService(token=projectToken)
