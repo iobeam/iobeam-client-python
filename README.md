@@ -2,7 +2,7 @@
 
 **[iobeam](http://iobeam.com)** is a data platform for connected devices.
 
-This is a Python library for sending data to the **iobeam Cloud**, e.g., from within an Android app.
+This is a Python library for sending data to the **iobeam Cloud**..
 For more information on the iobeam Cloud, please read our [full API documentation](http://docs.iobeam.com).
 
 *Please note that we are currently invite-only. You will need an invite
@@ -127,7 +127,7 @@ For each time-series data point, create a `iobeam.DataPoint` object:
     d = iobeam.DataPoint(t)
 
     # You can also pass a specific timestamp
-    now = ...
+    now = ... # e.g., now = int(time.time()*1000) (import time first)
     d = iobeam.DataPoint(t, timestamp=now)
 
 (The timestamp provided should be in milliseconds since epoch. The value
@@ -166,8 +166,12 @@ return `True` if successfull.
 Here's the full source code for our example:
 
     from iobeam import iobeam
+    import time
 
     # Constants initialization
+    PATH = ... # Can be None if you don't want to persist device_id to disk
+    PROJECT_ID = ... # int
+    PROJECT_TOKEN = ... # String
     ...
 
     # Init iobeam
@@ -177,7 +181,7 @@ Here's the full source code for our example:
     ...
 
     # Data gathering
-    now = ... // current time
+    now = int(time.time()*1000)
     dt = iobeam.DataPoint(getTemperature(), timestamp=now)
     dh = iobeam.DataPoint(getHumidity(), timestamp=now)
 
