@@ -26,7 +26,7 @@ class ImportService(object):
     '''
     def importData(self, projectId, deviceId, dataSeries):
         if not self.token:
-            raise request.UnauthorizedError();
+            raise request.UnauthorizedError.noTokenSet();
         if projectId is None:
             raise Exception("Project ID cannot be None")
         elif deviceId is None:

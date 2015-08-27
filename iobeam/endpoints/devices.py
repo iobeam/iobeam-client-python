@@ -20,7 +20,7 @@ class DeviceService(object):
     '''
     def getTimestamp(self):
         if not self.token:
-            raise request.UnauthorizedError();
+            raise request.UnauthorizedError.noTokenSet();
         endpoint = "devices/timestamp"
 
         r = request.get(request.makeEndpoint(endpoint)).token(self.token)
@@ -50,7 +50,7 @@ class DeviceService(object):
     '''
     def registerDevice(self, projectId, deviceId=None, deviceName=None):
         if not self.token:
-            raise request.UnauthorizedError();
+            raise request.UnauthorizedError.noTokenSet();
         endpoint = "devices/"
 
         r = request.post(request.makeEndpoint(endpoint)).token(self.token)
@@ -68,5 +68,10 @@ class DeviceService(object):
             resp = r.getResponse()
             ret = device.Device(projectId, resp["device_id"],
                                 resp["device_name"])
+        elif r.getResponseCode() == 403:
+            raise request.UnauthorizedError("Invalid credentials.")
+        else:
+            raise request.Error("Received unexpected code: {}".format(
+                r.getResponseCode()))
 
         return ret

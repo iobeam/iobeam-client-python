@@ -23,7 +23,7 @@ class ExportService(object):
     '''
     def getData(self, query):
         if not self.token:
-            raise request.UnauthorizedError();
+            raise request.UnauthorizedError.noTokenSet();
         if query is None:
             raise Exception("query cannot be None")
 

@@ -13,8 +13,19 @@ def makeEndpoint(endpoint):
 
 
 class UnauthorizedError(Exception):
-    def __init__(self):
-        self.value = "Unauthorized - no token set."
+    def __init__(self, value):
+        self.value = "Unauthorized: {}".format(value)
+
+    def __str__(self):
+        return repr(self.value)
+
+    @staticmethod
+    def noTokenSet():
+        return UnauthorizedError("no token set.")
+
+class Error(Exception):
+    def __init__(self, value):
+        self.value = value
 
     def __str__(self):
         return repr(self.value)
