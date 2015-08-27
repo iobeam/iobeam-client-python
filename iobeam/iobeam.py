@@ -44,9 +44,12 @@ class Iobeam(object):
         else:
             if self._path is not None:
                 p = os.path.join(self._path, DEVICE_ID_FILE)
-                with open(p, "r") as f:
-                    did = f.read()
-                    self._activeDevice = device.Device(projectId, did, None)
+                if os.path.isfile(p):
+                    with open(p, "r") as f:
+                        did = f.read()
+                        self._activeDevice = device.Device(projectId, did, None)
+                else:
+                    self._activeDevice = None
             else:
                 self._activeDevice = None
 
@@ -68,9 +71,8 @@ class Iobeam(object):
         This client object (allows for chaining)
     '''
     def registerDevice(self, deviceId=None, deviceName=None):
-        if self._activeDevice is None:
-            return self
-        if self._activeDevice.deviceId == deviceId:
+        if self._activeDevice is not None and (deviceId is None or
+            self._activeDevice.deviceId == deviceId):
             return self
 
         device = self._deviceService.registerDevice(self.projectId,
