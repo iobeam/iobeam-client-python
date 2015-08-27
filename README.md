@@ -75,8 +75,8 @@ There are two ways to register a `device_id`:
 
     ...
 
-    iobeamClient = new iobeam.Iobeam(PATH, PROJECT_ID, PROJECT_TOKEN);
-    iobeamClient.registerDevice();
+    iobeamClient = iobeam.Iobeam(PATH, PROJECT_ID, PROJECT_TOKEN)
+    iobeamClient.registerDevice()
 
 (2) Provide your own (must be unique to your project):
 
@@ -84,8 +84,8 @@ There are two ways to register a `device_id`:
 
     ...
 
-    iobeamClient = new iobeam.Iobeam(PATH, PROJECT_ID, PROJECT_TOKEN);
-    iobeamClient.registerDevice(deviceId="my_desired_id");
+    iobeamClient = iobeam.Iobeam(PATH, PROJECT_ID, PROJECT_TOKEN)
+    iobeamClient.registerDevice(deviceId="my_desired_id")
 
 The `device_id` will be saved to disk at the path `PATH`. On future
 calls, this on-disk storage will be read first. If a `device_id` exists,
@@ -103,8 +103,7 @@ constructor and skip the registration step.
 
     ...
 
-    iobeamClient = new iobeam.Iobeam(
-        PATH, PROJECT_ID, PROJECT_TOKEN, deviceId=DEVICE_ID);
+    iobeamClient = iobeam.Iobeam(PATH, PROJECT_ID, PROJECT_TOKEN, deviceId=DEVICE_ID)
 
 You *must* have registered some other way (CLI, website, previous
 installation, etc) for this to work.
@@ -124,10 +123,10 @@ and have no need to save it.
 
 For each time-series data point, create a `iobeam.DataPoint` object:
 
-    t = getTemperature();
-    d = iobeam.DataPoint(t);
+    t = getTemperature()
+    d = iobeam.DataPoint(t)
 
-    // You can also pass a specific timestamp
+    # You can also pass a specific timestamp
     now = ...
     d = iobeam.DataPoint(t, timestamp=now)
 
@@ -137,18 +136,18 @@ can be integral or real.)
 Now, pick a name for your data series (e.g., "temperature"), and add the
 `iobeam.DataPoint` under that series:
 
-    iobeamClient.addDataPoint("temperature", d);
+    iobeamClient.addDataPoint("temperature", d)
 
 Note that the `iobeam.Iobeam` object can hold several series at once. For
 example, if you also had a `getHumidity()` function, you could add both
 data points to the same `iobeam.Iobeam`:
 
-    now = ... // current time
-    dt = new DataPoint(getTemperature(), timestamp=now);
-    dh = new DataPoint(getHumidity(), timestamp=now);
+    now = ... # current time
+    dt = iobeam.DataPoint(getTemperature(), timestamp=now)
+    dh = iobeam.DataPoint(getHumidity(), timestamp=now)
 
-    iobeamClient.addDataPoint("temperature", dt);
-    iobeamClient.addDataPoint("humidity", dh);
+    iobeamClient.addDataPoint("temperature", dt)
+    iobeamClient.addDataPoint("humidity", dh)
 
 
 ### Connecting to the iobeam Cloud ###
@@ -156,7 +155,7 @@ data points to the same `iobeam.Iobeam`:
 You can send your data stored in `iobeam.Iobeam` to the iobeam Cloud
 easily:
 
-    iobeamClient.send();
+    iobeamClient.send()
 
 This call is blocking and will attempt to send all your data. It will
 return `True` if successfull.
@@ -168,27 +167,27 @@ Here's the full source code for our example:
 
     from iobeam import iobeam
 
-    // Constants initialization
+    # Constants initialization
     ...
 
-    // Init iobeam
-    iobeamClient = new iobeam.Iobeam(PATH, PROJECT_ID, PROJECT_TOKEN);
-    iobeamClient.registerDevice();
+    # Init iobeam
+    iobeamClient = iobeam.Iobeam(PATH, PROJECT_ID, PROJECT_TOKEN)
+    iobeamClient.registerDevice()
 
     ...
 
-    // Data gathering
+    # Data gathering
     now = ... // current time
-    dt = new DataPoint(getTemperature(), timestamp=now);
-    dh = new DataPoint(getHumidity(), timestamp=now);
+    dt = iobeam.DataPoint(getTemperature(), timestamp=now)
+    dh = iobeam.DataPoint(getHumidity(), timestamp=now)
 
-    iobeamClient.addDataPoint("temperature", dt);
-    iobeamClient.addDataPoint("humidity", dh);
+    iobeamClient.addDataPoint("temperature", dt)
+    iobeamClient.addDataPoint("humidity", dh)
 
     ...
 
-    // Data transmission
-    iobeamClient.send();
+    # Data transmission
+    iobeamClient.send()
 
 These instructions should hopefully be enough to get you started with the
 library!
