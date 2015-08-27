@@ -2,7 +2,7 @@
 
 **[iobeam](http://iobeam.com)** is a data platform for connected devices.
 
-This is a Python library for sending data to the **iobeam Cloud**..
+This is a Python library for sending data to the **iobeam Cloud**.
 For more information on the iobeam Cloud, please read our [full API documentation](http://docs.iobeam.com).
 
 *Please note that we are currently invite-only. You will need an invite
