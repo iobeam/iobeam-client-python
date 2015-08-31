@@ -79,6 +79,16 @@ class Iobeam(object):
 
         return self
 
+    def setDeviceId(self, deviceId):
+        device = device.Device(self.projectId, deviceId, None)
+        self._setActiveDevice(device)
+
+    def getDeviceId(self, deviceId):
+        if self._activeDevice is None:
+            return None
+        else
+            return self._activeDevice.deviceId
+
     def _setActiveDevice(self, device):
         self._activeDevice = device
         if self._path is not None:
