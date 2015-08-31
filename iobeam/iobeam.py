@@ -6,11 +6,14 @@ from .resources import device
 from .resources import query
 import os.path
 
+'''
+Aliases for resource types for convenience outside the package.
+'''
 DataPoint = data.DataPoint
 DataSeries = data.DataSeries
 QueryReq = query.Query
 
-DEVICE_ID_FILE = "iobeam_device_id"
+_DEVICE_ID_FILE = "iobeam_device_id"
 
 class ClientBuilder(object):
 
@@ -74,7 +77,7 @@ class _Client(object):
         if deviceId is not None:
             self._setActiveDevice(device.Device(projectId, deviceId, None))
         elif self._path is not None:
-            p = os.path.join(self._path, DEVICE_ID_FILE)
+            p = os.path.join(self._path, _DEVICE_ID_FILE)
             if os.path.isfile(p):
                 with open(p, "r") as f:
                     did = f.read()
@@ -117,13 +120,13 @@ class _Client(object):
     def getDeviceId(self, deviceId):
         if self._activeDevice is None:
             return None
-        else
+        else:
             return self._activeDevice.deviceId
 
     def _setActiveDevice(self, device):
         self._activeDevice = device
         if self._path is not None:
-            p = os.path.join(self._path, DEVICE_ID_FILE)
+            p = os.path.join(self._path, _DEVICE_ID_FILE)
             with open(p, "w") as f:
                 f.write(self._activeDevice.deviceId)
 
@@ -190,14 +193,16 @@ class _Client(object):
     '''
     Sends stored data to the iobeam backend.
 
-    Returns:
-        Whether the data was successfully sent.
+    Raises:
+        Will throw an Exception if sending the data fails.
     '''
     def send(self):
         pid = self.projectId
         did = self._activeDevice.deviceId
         dataset = self._dataset
-        return self._importService.importData(pid, did, dataset)
+        success, extra = self._importService.importData(pid, did, dataset)
+        if not success:
+            raise Exception("Send failed, server sent: {}".format(extra))
 
     '''
     Performs a query on the iobeam backend.
@@ -211,6 +216,10 @@ class _Client(object):
 
     Returns:
         A dictionary representing the results of the query.
+
+    Raises:
+        ValueError - If `token` or `query` is None, or `query` is the wrong
+                     type.
     '''
     @staticmethod
     def query(token, query):
@@ -219,7 +228,7 @@ class _Client(object):
         elif query is None:
             raise ValueError("query cannot be None")
         elif not isinstance(query, QueryReq):
-            raise ValueError("query must be a iobeam.resources.query.Query")
+            raise ValueError("query must be a iobeam.QueryReq")
 
         service = exports.ExportService(token)
         return service.getData(query)
