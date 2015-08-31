@@ -20,6 +20,9 @@ class ExportService(object):
 
     Returns:
         A dictionary representing the query results.
+
+    Raises:
+        Exception - If `query` is None
     '''
     def getData(self, query):
         if not self.token:

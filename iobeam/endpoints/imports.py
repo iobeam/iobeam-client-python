@@ -22,7 +22,7 @@ class ImportService(object):
             `iobeam.iobeam.DataPoint`s.
 
     Returns:
-        True if the data is sent successfully; false otherwise.
+        True if the data is sent successfully; False and the response otherwise.
     '''
     def importData(self, projectId, deviceId, dataSeries):
         if not self.token:
@@ -52,4 +52,7 @@ class ImportService(object):
         r.setBody(reqBody)
         r.execute()
 
-        return r.getResponseCode() == 200
+        if (r.getResponseCode() == 200):
+            return (True, None)
+        else:
+            return (False, r.getResponse())
