@@ -209,5 +209,76 @@ Here's the full source code for our example:
     # Data transmission
     iobeamClient.send()
 
-These instructions should hopefully be enough to get you started with the
-library!
+
+## Retrieving Data ##
+
+Once you've sent data to the iobeam backend, you may want to query it and
+process it. To do that, you'll need to create an `iobeam.QueryReq`, which is
+composed of three parts: a project id, a device name (optional), and a series
+name (optional). If a series name is not given, all series for that device are
+retrieved. If a device name is not given, all devices will be queried.
+
+In the simplest form, here is how you make a few different queries:
+
+    # all series from all devices in project PROJECT_ID
+    q = iobeam.QueryReq(PROJECT_ID)
+
+    # all series from device DEVICE_ID in project PROJECT_ID
+    q = iobeam.QueryReq(PROJECT_ID, deviceId=DEVICE_ID)
+
+    # series "temp" from device DEVICE_ID in project PROJECT_ID
+    q = iobeam.QueryReq(PROJECT_ID, deviceId=DEVICE_ID, seriesName="temp")
+
+Then to actually execute the query:
+
+    # token is a project token with read access
+    res = iobeam.MakeQuery(token, q)
+
+Your result will look something like this:
+
+    { "result": [
+        {
+            "project_id": "<PROJECT_ID>",
+            "device_id": "<DEVICE_ID>",
+            "name": "temp",
+            "data": [
+                {
+                    "time":  1427316488000,
+                    "value": 22.23
+                },
+                {
+                    "time":  1427316489000,
+                    "value": 22.22
+                }, ...
+            ]
+        }, ...
+      ],
+      "timefmt": "msec"
+    }
+
+
+### Adjusting Your Query ###
+
+You can modify your with several parameters, such as `to` and `from` and limits
+on the values you're interested in:
+
+    # start with this basic query
+    q = iobeam.QueryReq(PROJECT_ID, deviceId=DEVICE_ID, seriesName="temp")
+
+    # Last 5 results after a given START_TIME:
+    q = q.limit(5).fromTime(START_TIME)
+
+    # All results between two times, START and END
+    q = q.fromTime(START).toTime(END)
+
+    # All results where the value is greater than 0
+    q = q.greaterThan(0)
+
+The full list of (chainable) parameters:
+
+    limit(limit)
+    fromTime(time)
+    toTime(time)
+    greaterThan(value)
+    lessThan(value)
+    equals(value)
