@@ -16,6 +16,14 @@ Before you can start sending data to the iobeam Cloud, you'll need a
 [Command-line interface tool](https://github.com/iobeam/iobeam) or by
 accessing your project settings from [our web app](https://app.iobeam.com).
 
+You will need the [requests](http://www.python-requests.org/en/latest/) library
+installed. You can get it via pip:
+
+    pip install requests
+
+Further, you need python **2.7.9+** or **3.4.3** (other versions of python3 may work,
+but it has only been tested on 3.4.3).
+
 
 ## Installation ##
 
@@ -34,7 +42,7 @@ This library allows Python clients to send data to the iobeam Cloud.
 
 At a high-level, here's how it works:
 
-1. Initialize an `iobeam.Iobeam` object with your `project_id` and
+1. Build an iobeam client object with your `project_id` and
 `project_token`
 
 1. Register your device to get an auto-generated `device_id`. Optionally,
@@ -75,8 +83,9 @@ There are two ways to register a `device_id`:
 
     ...
 
-    iobeamClient = iobeam.Iobeam(PATH, PROJECT_ID, PROJECT_TOKEN)
-    iobeamClient.registerDevice()
+    builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
+                  .saveToDisk().registerDevice()
+    iobeamClient = builder.build()
 
 (2) Provide your own (must be unique to your project):
 
@@ -84,14 +93,15 @@ There are two ways to register a `device_id`:
 
     ...
 
-    iobeamClient = iobeam.Iobeam(PATH, PROJECT_ID, PROJECT_TOKEN)
-    iobeamClient.registerDevice(deviceId="my_desired_id")
+    builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
+                  .saveToDisk().registerDevice(deviceId="my_desired_id")
+    iobeamClient = builder.build()
 
-The `device_id` will be saved to disk at the path `PATH`. On future
-calls, this on-disk storage will be read first. If a `device_id` exists,
-the `registerDevice` will do nothing; otherwise, it will get a new random
-ID from us. If you provide a _different_ `device_id` to `registerDevice`,
-the old one will be replaced.
+With the `saveToDisk()` call, the `device_id` will be saved to disk in the
+directory the script is called from (optionally, you can supply a `path`).
+On future calls, this on-disk storage will be read first.
+If a `device_id` exists, the `registerDevice` will do nothing; otherwise,
+it will get a new random ID from us. If you provide a _different_ `device_id` to `registerDevice`, the old one will be replaced.
 
 **With a registered `device_id`**
 
@@ -103,15 +113,20 @@ constructor and skip the registration step.
 
     ...
 
-    iobeamClient = iobeam.Iobeam(PATH, PROJECT_ID, PROJECT_TOKEN, deviceId=DEVICE_ID)
+    builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
+                  .saveToDisk().setDeviceId(DEVICE_ID)
+    iobeamClient = builder.build()
 
 You *must* have registered some other way (CLI, website, previous
 installation, etc) for this to work.
 
 **Advanced: not saving to disk**
 
-If you don't want the `device_id` to be automatically stored for you, set
-the `path` parameter in either constructor to be `None`.
+If you don't want the `device_id` to be automatically stored for you, simply
+exclude the `saveToDisk()` call while building:
+
+    builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN).registerDevice()
+    iobeamClient = builder.build()
 
 This is useful for cases where you want to persist the ID yourself (e.g.
 in a settings file), or if you are making `Iobeam` objects that are
@@ -175,8 +190,9 @@ Here's the full source code for our example:
     ...
 
     # Init iobeam
-    iobeamClient = iobeam.Iobeam(PATH, PROJECT_ID, PROJECT_TOKEN)
-    iobeamClient.registerDevice()
+    builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
+                  .saveToDisk().registerDevice()
+    iobeamClient = builder.build()
 
     ...
 
