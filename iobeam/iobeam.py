@@ -8,11 +8,42 @@ import os.path
 
 DataPoint = data.DataPoint
 DataSeries = data.DataSeries
-Query = query.Query
+QueryReq = query.Query
 
 DEVICE_ID_FILE = "iobeam_device_id"
 
-class Iobeam(object):
+class ClientBuilder(object):
+
+    def __init__(self, projectId, projectToken):
+        self._projectId = projectId
+        self._projectToken = projectToken
+        self._diskPath = None
+        self._deviceId = None
+        self._regArgs = None
+
+    def saveToDisk(self, path="."):
+        self._diskPath = path
+        return self
+
+    def setDeviceId(self, deviceId):
+        self._deviceId = deviceId
+        return self
+
+    def registerDevice(self, deviceId=None, deviceName=None):
+        self._regArgs = (deviceId, deviceName)
+        return self
+
+    def build(self):
+        client = _Client(self._diskPath, self._projectId, self._projectToken,
+                         deviceId=self._deviceId)
+        if (self._regArgs is not None):
+            did, dname = self._regArgs
+            client.registerDevice(deviceId=did, deviceName=dname)
+
+        return client
+
+
+class _Client(object):
 
     '''
     Constructor for iobeam client object.
@@ -187,8 +218,10 @@ class Iobeam(object):
             raise ValueError("token cannot be None")
         elif query is None:
             raise ValueError("query cannot be None")
-        elif not isinstance(query, Query):
+        elif not isinstance(query, QueryReq):
             raise ValueError("query must be a iobeam.resources.query.Query")
 
         service = exports.ExportService(token)
         return service.getData(query)
+
+MakeQuery = _Client.query
