@@ -13,7 +13,7 @@ DataPoint = data.DataPoint
 DataSeries = data.DataSeries
 QueryReq = query.Query
 
-__DEVICE_ID_FILE = "iobeam_device_id"
+_DEVICE_ID_FILE = "iobeam_device_id"
 
 class ClientBuilder(object):
 
@@ -77,7 +77,7 @@ class _Client(object):
         if deviceId is not None:
             self._setActiveDevice(device.Device(projectId, deviceId, None))
         elif self._path is not None:
-            p = os.path.join(self._path, __DEVICE_ID_FILE)
+            p = os.path.join(self._path, _DEVICE_ID_FILE)
             if os.path.isfile(p):
                 with open(p, "r") as f:
                     did = f.read()
@@ -120,13 +120,13 @@ class _Client(object):
     def getDeviceId(self, deviceId):
         if self._activeDevice is None:
             return None
-        else
+        else:
             return self._activeDevice.deviceId
 
     def _setActiveDevice(self, device):
         self._activeDevice = device
         if self._path is not None:
-            p = os.path.join(self._path, __DEVICE_ID_FILE)
+            p = os.path.join(self._path, _DEVICE_ID_FILE)
             with open(p, "w") as f:
                 f.write(self._activeDevice.deviceId)
 
