@@ -4,6 +4,7 @@ from .endpoints import imports
 from .resources import data
 from .resources import device
 from .resources import query
+from .utils import utils
 import os.path
 
 '''
@@ -63,8 +64,7 @@ class _Client(object):
         deviceName - Device name if previously registered
     '''
     def __init__(self, path, projectId, projectToken, deviceId=None):
-        if projectId is None or not isinstance(projectId, int):
-            raise ValueError("projectId must be an int")
+        utils.checkValidProjectId(projectId)
         if projectToken is None:
             raise ValueError("projectToken cannot be None")
 

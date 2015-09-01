@@ -1,11 +1,13 @@
+from iobeam.utils import utils
+
 '''
 Represents a data query.
 '''
 class Query(object):
 
     def __init__(self, projectId, deviceId=None, seriesName=None):
-        if projectId is None:
-            raise Exception("Project ID cannot be None")
+        utils.checkValidProjectId(projectId)
+
         self._pid = projectId
         self._did = deviceId
         self._series = seriesName
