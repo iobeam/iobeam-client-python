@@ -27,7 +27,9 @@ but it has only been tested on 3.4.3).
 
 ## Installation ##
 
-**[insert `pip` instructions]**
+To install with pip:
+
+    pip install iobeam
 
 To install from source:
 
