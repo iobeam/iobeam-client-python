@@ -6,10 +6,10 @@ def get(url):
 def post(url):
     return Request("POST", url)
 
-BASE_URL = "https://api.iobeam.com/v1/"
+_BASE_URL = "https://api.iobeam.com/v1/"
 
 def makeEndpoint(endpoint):
-    return BASE_URL + endpoint
+    return _BASE_URL + endpoint
 
 
 class UnauthorizedError(Exception):

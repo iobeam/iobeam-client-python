@@ -117,7 +117,7 @@ class _Client(object):
         device = device.Device(self.projectId, deviceId)
         self._setActiveDevice(device)
 
-    def getDeviceId(self, deviceId):
+    def getDeviceId(self):
         if self._activeDevice is None:
             return None
         else:
