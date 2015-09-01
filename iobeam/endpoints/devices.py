@@ -67,7 +67,7 @@ class DeviceService(object):
         if r.getResponseCode() == 201:
             resp = r.getResponse()
             ret = device.Device(projectId, resp["device_id"],
-                                resp["device_name"])
+                                deviceName=resp["device_name"])
         elif r.getResponseCode() == 403:
             raise request.UnauthorizedError("Invalid credentials.")
         else:

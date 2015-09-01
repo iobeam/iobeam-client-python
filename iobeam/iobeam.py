@@ -75,14 +75,14 @@ class _Client(object):
 
         self._activeDevice = None
         if deviceId is not None:
-            self._setActiveDevice(device.Device(projectId, deviceId, None))
+            self._setActiveDevice(device.Device(projectId, deviceId))
         elif self._path is not None:
             p = os.path.join(self._path, _DEVICE_ID_FILE)
             if os.path.isfile(p):
                 with open(p, "r") as f:
                     did = f.read()
                     if len(did) > 0:
-                        self._activeDevice = device.Device(projectId, did, None)
+                        self._activeDevice = device.Device(projectId, did)
 
 
         # Setup services
@@ -114,7 +114,7 @@ class _Client(object):
         return self
 
     def setDeviceId(self, deviceId):
-        device = device.Device(self.projectId, deviceId, None)
+        device = device.Device(self.projectId, deviceId)
         self._setActiveDevice(device)
 
     def getDeviceId(self, deviceId):
