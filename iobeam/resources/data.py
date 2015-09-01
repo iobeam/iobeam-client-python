@@ -12,12 +12,18 @@ class DataPoint(object):
     Takes in a value, which must be a number type, and optionally a
     timestamp. If a timestamp is not supplied, the current time in
     milliseconds is used.
+
+    Raises:
+        ValueError - If value is not a number (int/float) or timestamp is not an
+                     int.
     '''
     def __init__(self, value, timestamp=None):
         if not (isinstance(value, int) or isinstance(value, float)):
             raise ValueError("'value' must be a number.")
         if timestamp is None:
             self._timestamp = int(time() * 1000)
+        elif not isinstance(timestamp, int):
+            raise ValueError("timestamp must be an int (milliseconds)")
         else:
             self._timestamp = int(timestamp)
         self._value = value
