@@ -1,19 +1,21 @@
 # iobeam Python Library
 
-**[iobeam](http://iobeam.com)** is a data platform for connected devices.
+**[iobeam](https://iobeam.com)** is a data platform for connected devices.
 
-This is a Python library for sending data to the **iobeam Cloud**.
-For more information on the iobeam Cloud, please read our [full API documentation](http://docs.iobeam.com).
+This is a Python library for sending data to the **iobeam**.
+For more information on the iobeam, please [check our our documentation](https://docs.iobeam.com).
 
 *Please note that we are currently invite-only. You will need an invite
-to generate a valid token and use our APIs. (Sign up [here](http://iobeam.com) for an invite.)*
+to generate a valid token and use our APIs.
+([Sign up here](https://iobeam.com) for an invite.)*
+
 
 ## Before you start ##
 
-Before you can start sending data to the iobeam Cloud, you'll need a
+Before you can start sending data to the iobeam backend, you'll need a
 `project_id` and  `project_token` (with write-access enabled) for a valid
 **iobeam** account. You can get these easily with our
-[Command-line interface tool](https://github.com/iobeam/iobeam) or by
+[command-line interface (CLI) tool](https://github.com/iobeam/iobeam) or by
 accessing your project settings from [our web app](https://app.iobeam.com).
 
 You will need the [requests](http://www.python-requests.org/en/latest/) library
@@ -21,8 +23,8 @@ installed. You can get it via pip:
 
     pip install requests
 
-Further, you need python **2.7.9+** or **3.4.3** (other versions of python3 may work,
-but it has only been tested on 3.4.3).
+Further, you need python **2.7.9+** or **3.4.3** (other versions of python3 may
+work, but it has only been tested on 3.4.3).
 
 
 ## Installation ##
@@ -40,23 +42,25 @@ Then make sure that the `iobeam-client-python` folder is in your `PYTHONPATH`.
 
 ## Overview ##
 
-This library allows Python clients to send data to the iobeam Cloud.
+This library allows Python clients to send and query data to the
+iobeam backend.
 
 At a high-level, here's how it works:
 
 1. Build an iobeam client object with your `project_id` and
 `project_token`
 
-1. Register your device to get an auto-generated `device_id`. Optionally,
-you can initialize the object with a previously registered `device_id` in
-the previous step and skip this step
+1. Make sure your device is registered, either generating a `device_id` in
+code or via another method (e.g., our CLI or REST APIs).
 
 1. Create a `iobeam.DataPoint` object for each time-series data point. Or,
 for a collection of data points, create a `iobeam.DataSeries` object.
 
-1. Add the `DataPoint` under your `series_name` (e.g., "temperature")
+1. Add the `iobeam.DataPoint` under your `series_name` (e.g., "temperature")
 
-1. When you're ready, send your data to the iobeam Cloud
+1. When you're ready, send your data to the iobeam backend
+
+1. Optionally, you can use this library to retrieve your data.
 
 
 ## Getting Started ##
@@ -71,7 +75,7 @@ Write down your new `project_id` and `project_token`.)
 
 ### iobeam Initialization ###
 
-There are several ways to initialize the `Iobeam` library. All require
+There are several ways to initialize the iobeam client. All require
 that you have `project_id` and `project_token` before hand.
 
 **Without a registered `device_id`**
@@ -144,7 +148,7 @@ For each time-series data point, create a `iobeam.DataPoint` object:
     d = iobeam.DataPoint(t)
 
     # You can also pass a specific timestamp
-    now = ... # e.g., now = int(time.time()*1000) (import time first)
+    now = ... # e.g., now = int(time.time() * 1000) (import time first)
     d = iobeam.DataPoint(t, timestamp=now)
 
 (The timestamp provided should be in milliseconds since epoch. The value
@@ -167,15 +171,15 @@ data points to the same `iobeam.Iobeam`:
     iobeamClient.addDataPoint("humidity", dh)
 
 
-### Connecting to the iobeam Cloud ###
+### Connecting to the iobeam backend ###
 
-You can send your data stored in `iobeam.Iobeam` to the iobeam Cloud
+You can send your data stored in `iobeam.Iobeam` to the iobeam backend
 easily:
 
     iobeamClient.send()
 
 This call is blocking and will attempt to send all your data. It will
-return `True` if successfull.
+return `True` if successful.
 
 
 ### Full Example ###
@@ -199,7 +203,7 @@ Here's the full source code for our example:
     ...
 
     # Data gathering
-    now = int(time.time()*1000)
+    now = int(time.time() * 1000)
     dt = iobeam.DataPoint(getTemperature(), timestamp=now)
     dh = iobeam.DataPoint(getHumidity(), timestamp=now)
 
