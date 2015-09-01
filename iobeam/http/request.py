@@ -6,7 +6,7 @@ def get(url):
 def post(url):
     return Request("POST", url)
 
-BASE_URL = "https://api-dev.iobeam.com/v1/"
+BASE_URL = "https://api.iobeam.com/v1/"
 
 def makeEndpoint(endpoint):
     return BASE_URL + endpoint

@@ -16,7 +16,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.1.3',
+    version='0.2.0',
 
     description='Library for connecting to iobeam, the data analysis \
     platform for the Internet of Things.',
