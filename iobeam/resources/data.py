@@ -35,6 +35,12 @@ class DataPoint(object):
         return "DataPoint{{timestamp: {}, value: {}}}".format(
             self._timestamp, self._value)
 
+    def __eq__(self, other):
+        if other is None or not isinstance(other, DataPoint):
+            return False
+        return (self._value == other._value) and (
+            self._timestamp == other._timestamp)
+
     '''
     Converts to a dictionary that is usable for the imports API.
 

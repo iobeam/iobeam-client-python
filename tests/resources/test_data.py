@@ -2,10 +2,6 @@ import unittest
 
 from iobeam.resources import data
 
-_PROJECT_ID = 1
-_DEVICE_ID = "py_test_id"
-_DEVICE_NAME = "py_test_device"
-
 
 class TestDataPoint(unittest.TestCase):
 
@@ -44,3 +40,37 @@ class TestDataPoint(unittest.TestCase):
         self.assertEqual(2, len(ret))
         self.assertEqual(10, ret["time"])
         self.assertEqual(5, ret["value"])
+
+
+class TestDataSeries(unittest.TestCase):
+
+    def test_constructorNonePoints(self):
+        name = "test"
+        pts = None
+
+        ds = data.DataSeries(name, pts)
+        self.assertEqual("test", ds.getName())
+        self.assertEqual(0, len(ds.getPoints()))
+        self.assertEqual(0, len(ds))
+
+    def test_constructorEmptyPoints(self):
+        name = "test"
+        pts = []
+
+        ds = data.DataSeries(name, pts)
+        self.assertEqual("test", ds.getName())
+        self.assertEqual(0, len(ds.getPoints()))
+        self.assertEqual(0, len(ds))
+
+    def test_constructor(self):
+        name = "test"
+        pts = [data.DataPoint(1), data.DataPoint(2), data.DataPoint(3)]
+
+        ds = data.DataSeries(name, pts)
+        self.assertEqual("test", ds.getName())
+        self.assertEqual(3, len(ds.getPoints()))
+        self.assertEqual(3, len(ds))
+        for i in range(0, len(pts)):
+            self.assertEqual(pts[i], ds.getPoints()[i])
+
+    # TODO: Add checks/tests for whether lists are of right type?
