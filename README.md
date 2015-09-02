@@ -10,7 +10,7 @@ to generate a valid token and use our APIs.
 ([Sign up here](https://iobeam.com) for an invite.)*
 
 
-## Before you start ##
+## Before you start
 
 Before you can start sending data to the iobeam backend, you'll need a
 `project_id` and  `project_token` (with write-access enabled) for a valid
@@ -27,7 +27,7 @@ Further, you need python **2.7.9+** or **3.4.3** (other versions of python3 may
 work, but it has only been tested on 3.4.3).
 
 
-## Installation ##
+## Installation
 
 To install with pip:
 
@@ -40,7 +40,7 @@ To install from source:
 Then make sure that the `iobeam-client-python` folder is in your `PYTHONPATH`.
 
 
-## Overview ##
+## Overview
 
 This library allows Python clients to send and query data to the
 iobeam backend.
@@ -63,7 +63,7 @@ for a collection of data points, create a `iobeam.DataSeries` object.
 1. Optionally, you can use this library to retrieve your data.
 
 
-## Getting Started ##
+## Getting Started
 
 Here's how to get started, using a basic example that sends temperature
 data to iobeam. (For simplicity, let's assume that the current temperature
@@ -73,7 +73,7 @@ can be accessed with `getTemperature()`).
 project_token (with write access) using the iobeam APIs, CLI or web app.
 Write down your new `project_id` and `project_token`.)
 
-### iobeam Initialization ###
+### iobeam Initialization
 
 There are several ways to initialize the iobeam client. All require
 that you have `project_id` and `project_token` before hand.
@@ -140,7 +140,7 @@ temporary. For example, if the device you are using acts as a relay or
 proxy for other devices, it could get the `device_id` from those devices
 and have no need to save it.
 
-### Tracking Time-series Data ###
+### Tracking Time-series Data
 
 For each time-series data point, create a `iobeam.DataPoint` object:
 
@@ -171,7 +171,7 @@ data points to the same `iobeam.Iobeam`:
     iobeamClient.addDataPoint("humidity", dh)
 
 
-### Connecting to the iobeam backend ###
+### Connecting to the iobeam backend
 
 You can send your data stored in `iobeam.Iobeam` to the iobeam backend
 easily:
@@ -182,7 +182,7 @@ This call is blocking and will attempt to send all your data. It will
 return `True` if successful.
 
 
-### Full Example ###
+### Full Example
 
 Here's the full source code for our example:
 
@@ -216,7 +216,7 @@ Here's the full source code for our example:
     iobeamClient.send()
 
 
-## Retrieving Data ##
+## Retrieving Data
 
 Once you've sent data to the iobeam backend, you may want to query it and
 process it. To do that, you'll need to create an `iobeam.QueryReq`, which is
@@ -263,7 +263,7 @@ Your result will look something like this:
     }
 
 
-### Adjusting Your Query ###
+### Adjusting Your Query
 
 You can modify your with several parameters, such as `to` and `from` and limits
 on the values you're interested in:
@@ -288,3 +288,14 @@ The full list of (chainable) parameters:
     greaterThan(value)
     lessThan(value)
     equals(value)
+
+
+## Running tests
+
+The tests use the Python `unittest` module, so you can invoke the tests with:
+
+    python -m unittest
+
+Or for more verbose output:
+
+    python -m unittest -v
