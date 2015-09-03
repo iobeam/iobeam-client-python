@@ -112,8 +112,10 @@ Returns:
 def makeUniformDataSeries(seriesName, startTime, endTime, values):
     if (seriesName is None) or (startTime is None) or (endTime is None):
         return None
+    elif not isinstance(startTime, int) or not isinstance(endTime, int):
+        return None  # TODO: should raise ValueError?
     elif endTime <= startTime:
-        return None
+        return None  # TODO: should raise ValueError?
     elif (values is None) or len(values) == 0:
         return DataSeries(seriesName, [])
 
@@ -124,7 +126,7 @@ def makeUniformDataSeries(seriesName, startTime, endTime, values):
     elif valLen == 2:
         pt1 = DataPoint(values[0], startTime)
         pt2 = DataPoint(values[1], endTime)
-        return DataSeries(seriesName, [pt1, p2])
+        return DataSeries(seriesName, [pt1, pt2])
 
     interval = (endTime - startTime) / (valLen - 1)
     pts = []
@@ -133,8 +135,10 @@ def makeUniformDataSeries(seriesName, startTime, endTime, values):
         xrange
     except NameError:
         xrange = range  # Python3
-    for i in xrange(0, valLen):
-        d = DataPoint(values[i], startTime + (i * interval))
+    for i in xrange(0, valLen - 1):
+        t = int(startTime + (i * interval))
+        d = DataPoint(values[i], timestamp=t)
         pts.append(d)
+    pts.append(DataPoint(values[valLen - 1], timestamp=endTime))
 
     return DataSeries(seriesName, pts)
