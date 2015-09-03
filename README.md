@@ -294,8 +294,8 @@ The full list of (chainable) parameters:
 
 The tests use the Python `unittest` module, so you can invoke the tests with:
 
-    python -m unittest
+    python -m unittest discover
 
 Or for more verbose output:
 
-    python -m unittest -v
+    python -m unittest discover -v
