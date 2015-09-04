@@ -17,12 +17,15 @@ class ImportService(object):
     Params:
         projectId - Project ID the data belongs to
         deviceId - Device ID the data belongs to
-        deviceName - Dataset to send, as a dictionary where the keys are
+        dataSeries - Dataset to send, as a dictionary where the keys are
             the name of the series, and the values are sets containing
             `iobeam.iobeam.DataPoint`s.
 
     Returns:
         True if the data is sent successfully; False and the response otherwise.
+
+    Raises:
+        Exception - If any of projectId, deviceId, or dataSeries is None.
     '''
     def importData(self, projectId, deviceId, dataSeries):
         if not self.token:
