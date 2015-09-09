@@ -6,8 +6,92 @@ Communicates with the backend and exposes available Imports API methods.
 '''
 class ImportService(object):
 
+    ''' Max number of points in a single request '''
+    _BATCH_SIZE = 1000
+
     def __init__(self, token=None):
         self.token = token
+
+    '''
+    Creates the body of a import request.
+
+    Params:
+        projectId - Project ID of the request
+        deviceId - Device ID of the request
+        dataset - The data series of the request, a map with names to lists
+            of data.DataPoints.
+
+    Returns:
+        A dictionary that is the body of an import request.
+    '''
+    @staticmethod
+    def _makeRequest(projectId, deviceId, dataset):
+        sources = []
+        req = {
+            "project_id": projectId, "device_id": deviceId, "sources": sources
+        }
+        for series in dataset:
+            pts = []
+            obj = {"name": series, "data": pts}
+            for d in dataset[series]:
+                pts.append(d.toDict())
+            sources.append(obj)
+
+        return req
+
+    '''
+    Creates a list of import requests from a data set.
+
+    If the data set is under _BATCH_SIZE, it will be one request. Otherwise
+    it will be split into multiple requests as follows:
+    (1) if a single series has less than ImportService._BATCH_SIZE points,
+        it will be a request.
+    (2) if a single series has more, it will be broken into multiple requests of
+        ImportService._BATCH_SIZE size.
+
+    Params:
+        projectId - Project ID of the requests
+        deviceId - Device ID of the requests
+        dataset - The data set that will be broken into requests.
+
+    Returns:
+        A list of import request bodies.
+    '''
+    @staticmethod
+    def _makeListOfReqs(projectId, deviceId, dataset):
+        totalLen = sum(len(dataset[k]) for k in dataset)
+
+        reqs = []
+        # No series, no requests
+        if totalLen == 0:
+            pass
+        # Everything can fit in one request
+        elif totalLen <= ImportService._BATCH_SIZE:
+            reqs.append(
+                ImportService._makeRequest(projectId, deviceId, dataset))
+        # Need to create multiple requests
+        else:
+            for series in dataset:
+                seriesLen = len(dataset[series])
+                # If the series itself is small enough, send it
+                if seriesLen <= ImportService._BATCH_SIZE:
+                    temp = {}
+                    temp[series] = dataset[series]
+                    reqs.append(
+                        ImportService._makeRequest(projectId, deviceId, temp))
+                # Split series into chunks of up to _BATCH_SIZE
+                else:
+                    idx = 0
+                    while idx < seriesLen:
+                        end = idx + ImportService._BATCH_SIZE
+                        vals = dataset[series][idx:end]
+                        temp = {}
+                        temp[series] = vals
+                        reqs.append(ImportService._makeRequest(
+                            projectId, deviceId, temp))
+                        idx += ImportService._BATCH_SIZE
+
+        return reqs
 
     '''
     Wraps API call `POST /imports`
@@ -41,21 +125,16 @@ class ImportService(object):
         endpoint = "imports/"
 
         r = request.post(request.makeEndpoint(endpoint)).token(self.token)
-        sources = []
-        reqBody = {
-            "project_id": projectId, "device_id": deviceId, "sources": sources
-        }
-        for k in dataSeries:
-            pts = []
-            obj = {"name": k, "data": pts}
-            for d in dataSeries[k]:
-                pts.append(d.toDict())
-            sources.append(obj)
+        reqs = ImportService._makeListOfReqs(projectId, deviceId, dataSeries)
 
-        r.setBody(reqBody)
-        r.execute()
+        success = True
+        extra = None
+        for req in reqs:
+            r = request.post(request.makeEndpoint(endpoint)).token(self.token)
+            r.setBody(req)
+            r.execute()
+            success = success and (r.getResponseCode() == 200)
+            if r.getResponseCode() != 200:
+                extra = r.getResponse()
 
-        if (r.getResponseCode() == 200):
-            return (True, None)
-        else:
-            return (False, r.getResponse())
+        return (success, extra)
