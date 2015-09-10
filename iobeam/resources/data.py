@@ -41,6 +41,9 @@ class DataPoint(object):
         return (self._value == other._value) and (
             self._timestamp == other._timestamp)
 
+    def __hash__(self):
+        return self._timestamp + self._value
+
     '''
     Converts to a dictionary that is usable for the imports API.
 
