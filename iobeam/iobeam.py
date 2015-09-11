@@ -107,15 +107,15 @@ class _Client(object):
             self._activeDevice.deviceId == deviceId):
             return self
 
-        device = self._deviceService.registerDevice(self.projectId,
+        d = self._deviceService.registerDevice(self.projectId,
             deviceId=deviceId, deviceName=deviceName)
-        self._setActiveDevice(device)
+        self._setActiveDevice(d)
 
         return self
 
     def setDeviceId(self, deviceId):
-        device = device.Device(self.projectId, deviceId)
-        self._setActiveDevice(device)
+        d = device.Device(self.projectId, deviceId)
+        self._setActiveDevice(d)
 
     def getDeviceId(self):
         if self._activeDevice is None:
