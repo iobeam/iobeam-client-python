@@ -11,9 +11,9 @@ DataPoint = data.DataPoint
 
 
 def makeLinearDataSeries(limit):
-    ret = []
+    ret = set()
     for x in range(0, int(limit)):
-        ret.append(DataPoint(x))
+        ret.add(DataPoint(x))
 
     return ret
 

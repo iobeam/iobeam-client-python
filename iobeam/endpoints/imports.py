@@ -82,9 +82,10 @@ class ImportService(object):
                 # Split series into chunks of up to _BATCH_SIZE
                 else:
                     idx = 0
+                    valsList = list(dataset[series])
                     while idx < seriesLen:
                         end = idx + ImportService._BATCH_SIZE
-                        vals = dataset[series][idx:end]
+                        vals = valsList[idx:end]
                         temp = {}
                         temp[series] = vals
                         reqs.append(ImportService._makeRequest(
