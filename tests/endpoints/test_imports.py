@@ -14,8 +14,8 @@ DataPoint = data.DataPoint
 
 class DummyImportService(request.DummyRequest):
 
-    def __init__(self, method, url):
-        request.DummyRequest.__init__(self, method, url)
+    def __init__(self):
+        request.DummyRequest.__init__(self, None, None)
         self.lastUrl = None
         self.lastParams = None
         self.lastHeaders = None
@@ -142,8 +142,8 @@ class TestImportService(unittest.TestCase):
         self._basicRequestListChecks(reqList, 3)
 
     def test_importData(self):
-        service = ImportService(
-            _TOKEN, requester=request.DummyRequester(DummyImportService))
+        dummy = DummyImportService()
+        service = ImportService(_TOKEN, requester=request.DummyRequester(dummy))
         self.assertEqual(_TOKEN, service.token)
         self.assertTrue(service._requester is not None)
 

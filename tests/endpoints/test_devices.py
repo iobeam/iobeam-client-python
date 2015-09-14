@@ -18,9 +18,8 @@ Device = device.Device
 
 class DummyDeviceService(request.DummyRequest):
 
-    def __init__(self, method, url):
-        request.DummyRequest.__init__(self, method, url)
-        self.lastUrl = None
+    def __init__(self):
+        request.DummyRequest.__init__(self, None, None)
         self.lastParams = None
         self.lastHeaders = None
         self.lastJson = None
@@ -56,8 +55,8 @@ class DummyDeviceService(request.DummyRequest):
 class TestDeviceService(unittest.TestCase):
 
     def test_getTimestamp(self):
-        service = DeviceService(
-            _TOKEN, requester=request.DummyRequester(DummyDeviceService))
+        dummy = DummyDeviceService()
+        service = DeviceService(_TOKEN, requester=request.DummyRequester(dummy))
         self.assertEqual(_TOKEN, service.token)
         self.assertTrue(service._requester is not None)
 
@@ -71,8 +70,8 @@ class TestDeviceService(unittest.TestCase):
         self.assertEqual(dname, ret.deviceName)
 
     def test_registerDeviceNone(self):
-        service = DeviceService(
-            _TOKEN, requester=request.DummyRequester(DummyDeviceService))
+        dummy = DummyDeviceService()
+        service = DeviceService(_TOKEN, requester=request.DummyRequester(dummy))
         self.assertEqual(_TOKEN, service.token)
         self.assertTrue(service._requester is not None)
 
@@ -80,8 +79,8 @@ class TestDeviceService(unittest.TestCase):
         self._checkDevice(ret, 1, _NONE_DEVICE_ID, _NONE_DEVICE_NAME)
 
     def test_registerDevice(self):
-        service = DeviceService(
-            _TOKEN, requester=request.DummyRequester(DummyDeviceService))
+        dummy = DummyDeviceService()
+        service = DeviceService(_TOKEN, requester=request.DummyRequester(dummy))
         self.assertEqual(_TOKEN, service.token)
         self.assertTrue(service._requester is not None)
 

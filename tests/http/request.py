@@ -10,17 +10,27 @@ Basic dummy request factory.
 '''
 class DummyRequester(object):
 
-    def __init__(self, requestClass):
-        self._requestClass = requestClass
+    def __init__(self, request):
+        self._request = request
+        self.lastMethod = None
+        self.lastUrl = None
 
     def makeEndpoint(self, endpoint):
         return _BASE_URL + endpoint
 
     def get(self, url):
-        return self._requestClass("GET", url)
+        self.lastMethod = "GET"
+        self.lastUrl = url
+        self._request.method = "GET"
+        self._request.url = url
+        return self._request
 
     def post(self, url):
-        return self._requestClass("POST", url)
+        self.lastMethod = "POST"
+        self.lastUrl = url
+        self._request.method = "POST"
+        self._request.url = url
+        return self._request
 
 
 '''
