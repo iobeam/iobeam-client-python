@@ -13,6 +13,8 @@ Aliases for resource types for convenience outside the package.
 '''
 DataPoint = data.DataPoint
 DataSeries = data.DataSeries
+Timestamp = data.Timestamp
+TimeUnit = data.TimeUnit
 QueryReq = query.Query
 
 _DEVICE_ID_FILE = "iobeam_device_id"

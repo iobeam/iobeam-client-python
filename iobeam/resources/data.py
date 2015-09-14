@@ -1,5 +1,32 @@
 from time import time
+from enum import Enum
 
+class TimeUnit(Enum):
+    MILLISECONDS = 0
+    MICROSECONDS = 1
+    SECONDS = 2
+
+class Timestamp(object):
+
+    def __init__(self, value, type=TimeUnit.MILLISECONDS):
+        self._value = value
+        self._type = type
+
+    def __eq__(self, other):
+        if other is None or not isinstance(other, Timestamp):
+            return False
+
+        return self.asMicroseconds() == other.asMicroseconds()
+
+    def asMicroseconds(self):
+        if self._type == TimeUnit.MICROSECONDS:
+            return self._value
+        elif self._type == TimeUnit.MILLISECONDS:
+            return int(self._value * 1000)
+        elif self._type == TimeUnit.SECONDS:
+            return int(self._value * 1000000)
+        else:
+            raise ValueError("unknown type")
 
 '''
 Represents a time-series datapoint, using a timestamp and value.
@@ -21,11 +48,16 @@ class DataPoint(object):
         if not (isinstance(value, int) or isinstance(value, float)):
             raise ValueError("'value' must be a number.")
         if timestamp is None:
-            self._timestamp = int(time() * 1000)
-        elif not isinstance(timestamp, int):
-            raise ValueError("timestamp must be an int (milliseconds)")
+            self._timestamp = Timestamp(int(time() * 1000),
+                                        TimeUnit.MILLISECONDS)
+        elif isinstance(timestamp, int):
+            self._timestamp = Timestamp(timestamp, TimeUnit.MILLISECONDS)
+        elif isinstance(timestamp, Timestamp):
+            self._timestamp = timestamp
         else:
-            self._timestamp = int(timestamp)
+            raise ValueError(
+                "invalid type for timestamp: {}".format(type(timestamp)))
+
         self._value = value
 
     '''
@@ -33,7 +65,7 @@ class DataPoint(object):
     '''
     def __str__(self):
         return "DataPoint{{timestamp: {}, value: {}}}".format(
-            self._timestamp, self._value)
+            self._timestamp.asMicroseconds(), self._value)
 
     def __eq__(self, other):
         if other is None or not isinstance(other, DataPoint):
@@ -42,7 +74,7 @@ class DataPoint(object):
             self._timestamp == other._timestamp)
 
     def __hash__(self):
-        return self._timestamp + self._value
+        return self._timestamp.asMicroseconds() + self._value
 
     '''
     Converts to a dictionary that is usable for the imports API.
@@ -51,7 +83,10 @@ class DataPoint(object):
         Dictionary with keys 'time' and 'value'.
     '''
     def toDict(self):
-        return {"time": self._timestamp, "value": self._value}
+        return {
+            "time": self._timestamp.asMicroseconds(),
+            "value": self._value
+        }
 
 '''
 A collection of DataPoints for a given named series.
