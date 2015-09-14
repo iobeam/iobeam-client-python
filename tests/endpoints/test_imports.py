@@ -2,12 +2,39 @@ import unittest
 
 from iobeam.endpoints import imports
 from iobeam.resources import data
+from tests.http import request
 
 _PROJECT_ID = 0
 _DEVICE_ID = "test_id"
+_TOKEN = "dummy"
 
 ImportService = imports.ImportService
 DataPoint = data.DataPoint
+
+
+class DummyImportService(request.DummyRequest):
+
+    def __init__(self, method, url):
+        request.DummyRequest.__init__(self, method, url)
+        self.lastUrl = None
+        self.lastParams = None
+        self.lastHeaders = None
+        self.lastJson = None
+
+    def dummyExecute(self, url, params=None, headers=None, json=None):
+        class Resp(dict):
+            __getattr__, __setattr__ = dict.get, dict.__setitem__
+
+            def json(self):
+                return self
+
+        if "imports" in url:
+            return Resp(self.importData())
+        else:
+            return None
+
+    def importData(self):
+        return {"status_code": 200}
 
 
 def makeLinearDataSeries(limit):
@@ -113,3 +140,16 @@ class TestImportService(unittest.TestCase):
         }
         reqList = ImportService._makeListOfReqs(_PROJECT_ID, _DEVICE_ID, d)
         self._basicRequestListChecks(reqList, 3)
+
+    def test_importData(self):
+        service = ImportService(
+            _TOKEN, requester=request.DummyRequester(DummyImportService))
+        self.assertEqual(_TOKEN, service.token)
+        self.assertTrue(service._requester is not None)
+
+        dataset = {
+            "t": makeLinearDataSeries(10)
+        }
+        success, extra = service.importData(1, _DEVICE_ID, dataset)
+        self.assertTrue(success)
+        self.assertTrue(extra is None)
