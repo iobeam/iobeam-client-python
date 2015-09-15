@@ -1,6 +1,7 @@
 from .endpoints import devices
 from .endpoints import exports
 from .endpoints import imports
+from .http import request
 from .resources import data
 from .resources import device
 from .resources import query
@@ -24,6 +25,7 @@ class ClientBuilder(object):
         self._diskPath = None
         self._deviceId = None
         self._regArgs = None
+        self._backend = None
 
     def saveToDisk(self, path="."):
         self._diskPath = path
@@ -37,9 +39,13 @@ class ClientBuilder(object):
         self._regArgs = (deviceId, deviceName)
         return self
 
+    def setBackend(self, baseUrl):
+        self._backend = request.Requester(baseUrl=baseUrl)
+        return self
+
     def build(self):
         client = _Client(self._diskPath, self._projectId, self._projectToken,
-                         deviceId=self._deviceId)
+                         self._backend, deviceId=self._deviceId)
         if (self._regArgs is not None):
             did, dname = self._regArgs
             client.registerDevice(deviceId=did, deviceName=dname)
@@ -61,9 +67,11 @@ class _Client(object):
         path - Path where device ID should be persisted
         projectId - iobeam project ID
         projectToken - iobeam project token with write access for sending data
-        deviceName - Device name if previously registered
+        backend - Base url of the backend to use; if None, requests go to
+                  https://api.iobeam.com/v1/
+        deviceId - Device id if previously registered
     '''
-    def __init__(self, path, projectId, projectToken, deviceId=None):
+    def __init__(self, path, projectId, projectToken, backend, deviceId=None):
         utils.checkValidProjectId(projectId)
         if projectToken is None:
             raise ValueError("projectToken cannot be None")
@@ -86,8 +94,11 @@ class _Client(object):
 
 
         # Setup services
-        self._deviceService = devices.DeviceService(projectToken)
-        self._importService = imports.ImportService(projectToken)
+        requester = backend
+        self._deviceService = devices.DeviceService(projectToken,
+                                                    requester=backend)
+        self._importService = imports.ImportService(projectToken,
+                                                    requester=backend)
 
     '''
     Registers the device with iobeam.
@@ -222,15 +233,19 @@ class _Client(object):
                      type.
     '''
     @staticmethod
-    def query(token, query):
+    def query(token, query, backend=None):
         if token is None:
             raise ValueError("token cannot be None")
         elif query is None:
             raise ValueError("query cannot be None")
         elif not isinstance(query, QueryReq):
             raise ValueError("query must be a iobeam.QueryReq")
+        requester = None
+        if backend is not None:
+            requester = request.Requester(baseUrl=backend)
 
-        service = exports.ExportService(token)
+        print(requester)
+        service = exports.ExportService(token, requester=requester)
         return service.getData(query)
 
 MakeQuery = _Client.query
