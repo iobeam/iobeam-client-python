@@ -86,8 +86,8 @@ class _Client(object):
 
 
         # Setup services
-        self._deviceService = devices.DeviceService(token=projectToken)
-        self._importService = imports.ImportService(token=projectToken)
+        self._deviceService = devices.DeviceService(projectToken)
+        self._importService = imports.ImportService(projectToken)
 
     '''
     Registers the device with iobeam.

@@ -1,13 +1,14 @@
+from iobeam.endpoints import service
 from iobeam.http import request
 from iobeam.resources import device
 
 '''
 Communicates with the backend and exposes available Devices API methods.
 '''
-class DeviceService(object):
+class DeviceService(service.EndpointService):
 
-    def __init__(self, token=None):
-        self.token = token
+    def __init__(self, token, requester=None):
+        service.EndpointService.__init__(self, token, requester=requester)
 
     '''
     Wraps API call `GET /devices/timestamp`.
@@ -21,9 +22,9 @@ class DeviceService(object):
     def getTimestamp(self):
         if not self.token:
             raise request.UnauthorizedError.noTokenSet();
-        endpoint = "devices/timestamp"
+        endpoint = self.makeEndpoint("devices/timestamp")
 
-        r = request.get(request.makeEndpoint(endpoint)).token(self.token)
+        r = self.requester().get(endpoint).token(self.token)
         r.execute()
 
         if r.getResponseCode() == 200:
@@ -51,9 +52,9 @@ class DeviceService(object):
     def registerDevice(self, projectId, deviceId=None, deviceName=None):
         if not self.token:
             raise request.UnauthorizedError.noTokenSet();
-        endpoint = "devices/"
+        endpoint = self.makeEndpoint("devices")
 
-        r = request.post(request.makeEndpoint(endpoint)).token(self.token)
+        r = self.requester().post(endpoint).token(self.token)
         reqBody = {"project_id": projectId}
         if deviceId or deviceName:
             if deviceId:

@@ -1,16 +1,17 @@
+from iobeam.endpoints import service
 from iobeam.http import request
 
 
 '''
 Communicates with the backend and exposes available Imports API methods.
 '''
-class ImportService(object):
+class ImportService(service.EndpointService):
 
     ''' Max number of points in a single request '''
     _BATCH_SIZE = 1000
 
-    def __init__(self, token=None):
-        self.token = token
+    def __init__(self, token, requester=None):
+        service.EndpointService.__init__(self, token, requester=requester)
 
     '''
     Creates the body of a import request.
@@ -123,15 +124,15 @@ class ImportService(object):
             raise Exception("Dataset cannot be None")
         elif len(dataSeries) == 0:
             return True
-        endpoint = "imports/"
+        endpoint = self.makeEndpoint("imports")
 
-        r = request.post(request.makeEndpoint(endpoint)).token(self.token)
+        r = request.post(endpoint).token(self.token)
         reqs = ImportService._makeListOfReqs(projectId, deviceId, dataSeries)
 
         success = True
         extra = None
         for req in reqs:
-            r = request.post(request.makeEndpoint(endpoint)).token(self.token)
+            r = self.requester().post(endpoint).token(self.token)
             r.setBody(req)
             r.execute()
             success = success and (r.getResponseCode() == 200)
