@@ -61,4 +61,20 @@ class TestDevice(unittest.TestCase):
             d = device.Device(_PROJECT_ID, badId)
             self.assertTrue(False)
         except ValueError as e:
-            self.assertEqual("deviceId cannot be None", str(e))
+            self.assertEqual("deviceId must be a string", str(e))
+
+        # Must be a str
+        badId = 1
+        try:
+            d = device.Device(_PROJECT_ID, badId)
+            self.assertTrue(False)
+        except ValueError as e:
+            self.assertEqual("deviceId must be a string", str(e))
+
+        # Cannot be 0-length
+        badId = ""
+        try:
+            d = device.Device(_PROJECT_ID, badId)
+            self.assertTrue(False)
+        except ValueError as e:
+            self.assertEqual("deviceId must be more than 0 characters", str(e))
