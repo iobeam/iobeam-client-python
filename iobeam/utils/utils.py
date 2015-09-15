@@ -19,3 +19,9 @@ def checkValidDeviceId(deviceId):
         raise ValueError("deviceId must be a string")
     elif len(deviceId) == 0:
         raise ValueError("deviceId must be more than 0 characters")
+
+def checkValidProjectToken(token):
+    if token is None or not isinstance(token, str):
+        raise ValueError("token must be a string")
+    elif len(token) == 0:
+        raise ValueError("token must be more than 0 characters")
