@@ -132,7 +132,7 @@ class ImportService(service.EndpointService):
         success = True
         extra = None
         for req in reqs:
-            r = self.requester().post(request.makeEndpoint(endpoint)).token(self.token)
+            r = self.requester().post(endpoint).token(self.token)
             r.setBody(req)
             r.execute()
             success = success and (r.getResponseCode() == 200)
