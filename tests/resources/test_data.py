@@ -76,11 +76,13 @@ class TestDataSeries(unittest.TestCase):
     # TODO: Add checks/tests for whether lists are of right type?
 
 
-_SERIES_NAME = "test"
-
 class TestStaticFuncs(unittest.TestCase):
 
-    def testMakeUniformDataSeriesInvalid(self):
+    _SERIES_NAME = "test"
+
+    def test_makeUniformDataSeriesInvalid(self):
+        _SERIES_NAME = TestStaticFuncs._SERIES_NAME
+
         # No name == None
         ret = data.makeUniformDataSeries(None, 0, 10, [0])
         self.assertTrue(ret is None)
@@ -119,7 +121,9 @@ class TestStaticFuncs(unittest.TestCase):
         self.assertEqual(0, len(ret))
         self.assertEqual(_SERIES_NAME, ret.getName())
 
-    def testMakeUniformDataSeries(self):
+    def test_makeUniformDataSeries(self):
+        _SERIES_NAME = TestStaticFuncs._SERIES_NAME
+
         start = 10
         end = 110
 
