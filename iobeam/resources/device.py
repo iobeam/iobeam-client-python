@@ -22,8 +22,7 @@ class Device(object):
     '''
     def __init__(self, projectId, deviceId, deviceName=None):
         utils.checkValidProjectId(projectId)
-        if deviceId is None:
-            raise ValueError("deviceId cannot be None")
+        utils.checkValidDeviceId(deviceId)
 
         self.projectId = projectId
         self.deviceId = deviceId

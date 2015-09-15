@@ -20,6 +20,9 @@ _DEVICE_ID_FILE = "iobeam_device_id"
 class ClientBuilder(object):
 
     def __init__(self, projectId, projectToken):
+        utils.checkValidProjectId(projectId)
+        utils.checkValidProjectToken(projectToken)
+
         self._projectId = projectId
         self._projectToken = projectToken
         self._diskPath = None
@@ -32,6 +35,7 @@ class ClientBuilder(object):
         return self
 
     def setDeviceId(self, deviceId):
+        utils.checkValidDeviceId(deviceId)
         self._deviceId = deviceId
         return self
 
@@ -73,8 +77,7 @@ class _Client(object):
     '''
     def __init__(self, path, projectId, projectToken, backend, deviceId=None):
         utils.checkValidProjectId(projectId)
-        if projectToken is None:
-            raise ValueError("projectToken cannot be None")
+        utils.checkValidProjectToken(projectToken)
 
         self.projectId = projectId
         self.projectToken = projectToken
