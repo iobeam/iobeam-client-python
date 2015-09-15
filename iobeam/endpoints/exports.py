@@ -1,13 +1,13 @@
+from iobeam.endpoints import service
 from iobeam.http import request
-
 
 '''
 Communicates with the backend and exposes available Exports API methods.
 '''
-class ExportService(object):
+class ExportService(service.EndpointService):
 
-    def __init__(self, token=None):
-        self.token = token
+    def __init__(self, token, requester=None):
+        service.EndpointService.__init__(self, token, requester=requester)
 
     '''
     Wraps API call `POST /exports`
@@ -30,9 +30,9 @@ class ExportService(object):
         if query is None:
             raise Exception("query cannot be None")
 
-        endpoint = "exports/{}".format(query.getUrl())
+        endpoint = self.makeEndpoint("exports/{}".format(query.getUrl()))
 
-        r = request.get(request.makeEndpoint(endpoint)).token(self.token)
+        r = self.requester().get(endpoint).token(self.token)
         params = query.getParams()
         for p in params:
             r.setParam(p, params[p])

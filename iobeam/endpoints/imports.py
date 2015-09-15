@@ -126,9 +126,7 @@ class ImportService(service.EndpointService):
             return True
         endpoint = self.makeEndpoint("imports")
 
-        r = request.post(endpoint).token(self.token)
         reqs = ImportService._makeListOfReqs(projectId, deviceId, dataSeries)
-
         success = True
         extra = None
         for req in reqs:

@@ -1,15 +1,20 @@
 import requests
 
-def get(url):
-    return Request("GET", url)
+class Requester(object):
 
-def post(url):
-    return Request("POST", url)
+    _BASE_URL = "https://api.iobeam.com/v1/"
 
-_BASE_URL = "https://api.iobeam.com/v1/"
+    def __init__(self, baseUrl=_BASE_URL):
+        self._baseUrl = baseUrl
 
-def makeEndpoint(endpoint):
-    return _BASE_URL + endpoint
+    def makeEndpoint(self, endpoint):
+        return self._baseUrl + endpoint
+
+    def get(self, url):
+        return Request("GET", url)
+
+    def post(self, url):
+        return Request("POST", url)
 
 
 class UnauthorizedError(Exception):
