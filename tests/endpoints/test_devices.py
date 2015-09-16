@@ -53,7 +53,16 @@ class DummyDeviceService(request.DummyRequest):
     def registerDevice(self, deviceId=None, deviceName=None):
         did = deviceId or _NONE_DEVICE_ID
         dname = deviceName or _NONE_DEVICE_NAME
-        return {"status_code": 201, "device_id": did, "device_name": dname}
+        # For compatibility with both Python 2 and 3.
+        try:
+            unicode
+        except NameError:
+            unicode = str  # Python3
+        return {
+            "status_code": 201,
+            "device_id": unicode(did),
+            "device_name": unicode(dname)
+        }
 
     def reset(self):
         self.lastParams = None
