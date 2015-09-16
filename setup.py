@@ -9,6 +9,11 @@ https://github.com/pypa/sampleproject
 from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
+import sys
+
+install_requires = ['requests']
+if sys.version_info < (3, 4):
+    install_requires.append('enum34')
 
 setup(
     name='iobeam',
@@ -16,7 +21,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.4.1',
+    version='0.4.2',
 
     description='Library for connecting to iobeam, the data analysis \
     platform for the Internet of Things.',
@@ -64,7 +69,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['requests', 'enum34'],
+    install_requires=install_requires,
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
