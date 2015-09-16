@@ -1,6 +1,7 @@
 import unittest
 
 from iobeam import iobeam
+from iobeam.resources import data
 
 class TestClientBuilder(unittest.TestCase):
 
@@ -80,3 +81,90 @@ class TestClient(unittest.TestCase):
             self.assertTrue(False)
         except ValueError:
             pass
+
+    def test_addDataPointInvalid(self):
+        client = self._makeTempClient()
+        series = "test"
+        dp = iobeam.DataPoint(0)
+
+        # TODO Add method to abstract size of dataset
+        client.addDataPoint(None, dp)
+        self.assertEqual(0, len(client._dataset))
+
+        client.addDataPoint(1, dp)
+        self.assertEqual(0, len(client._dataset))
+
+        client.addDataPoint("", dp)
+        self.assertEqual(0, len(client._dataset))
+
+        client.addDataPoint(series, None)
+        self.assertEqual(0, len(client._dataset))
+
+        client.addDataPoint(series, "not a point")
+        self.assertEqual(0, len(client._dataset))
+
+    def test_addDataPoint(self):
+        client = self._makeTempClient()
+        series = "test"
+        vals = [0, 11, 28]
+
+        dp = iobeam.DataPoint(vals[0])
+        client.addDataPoint(series, dp)
+        self.assertEqual(1, len(client._dataset))
+        self.assertEqual(1, len(client._dataset[series]))
+        self.assertTrue(dp in client._dataset[series])
+
+        dp = iobeam.DataPoint(vals[1])
+        client.addDataPoint(series, dp)
+        self.assertEqual(1, len(client._dataset))
+        self.assertEqual(2, len(client._dataset[series]))
+        self.assertTrue(dp in client._dataset[series])
+
+        dp = iobeam.DataPoint(vals[2])
+        client.addDataPoint(series, dp)
+        self.assertEqual(1, len(client._dataset))
+        self.assertEqual(3, len(client._dataset[series]))
+        self.assertTrue(dp in client._dataset[series])
+
+    def test_addDataSeriesInvalid(self):
+        client = self._makeTempClient()
+
+        client.addDataSeries(None)
+        self.assertEqual(0, len(client._dataset))
+
+        client.addDataSeries("not a series")
+        self.assertEqual(0, len(client._dataset))
+
+        ds = iobeam.DataSeries("test", None)
+        client.addDataSeries(ds)
+        self.assertEqual(0, len(client._dataset))
+
+    def test_addDataSeries(self):
+        client = self._makeTempClient()
+        series = "test"
+
+        ds = data.makeUniformDataSeries(series, 0, 100, [0, 1, 2])
+        client.addDataSeries(ds)
+        self.assertEqual(1, len(client._dataset))
+        self.assertEqual(3, len(client._dataset[series]))
+        for p in ds.getPoints():
+            self.assertTrue(p in client._dataset[series])
+
+        ds = data.makeUniformDataSeries(series, 101, 200, [3, 4, 5])
+        client.addDataSeries(ds)
+        self.assertEqual(1, len(client._dataset))
+        self.assertEqual(6, len(client._dataset[series]))
+        for p in ds.getPoints():
+            self.assertTrue(p in client._dataset[series])
+
+
+    def test_clearSeries(self):
+        client = self._makeTempClient()
+        series = "test"
+
+        dp = iobeam.DataPoint(45)
+        client.addDataPoint(series, dp)
+        self.assertEqual(1, len(client._dataset))
+        self.assertEqual(1, len(client._dataset[series]))
+        client.clearSeries(series)
+        self.assertEqual(0, len(client._dataset))
