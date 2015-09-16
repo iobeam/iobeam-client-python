@@ -165,9 +165,11 @@ class _Client(object):
         datapoint - DataPoint to be added
     '''
     def addDataPoint(self, seriesName, datapoint):
-        if (seriesName is None) or (datapoint is None):
+        if seriesName is None or not isinstance(seriesName, str):
             return
-        elif not isinstance(datapoint, data.DataPoint):
+        elif len(seriesName) == 0:
+            return
+        elif datapoint is None or not isinstance(datapoint, data.DataPoint):
             return
 
         if seriesName not in self._dataset:
@@ -183,9 +185,7 @@ class _Client(object):
         dataseries - The DataSeries to add to the data store.
     '''
     def addDataSeries(self, dataseries):
-        if dataseries is None:
-            return
-        elif not isinstance(dataseries, data.DataSeries):
+        if dataseries is None or not isinstance(dataseries, data.DataSeries):
             return
         elif len(dataseries) == 0:
             return

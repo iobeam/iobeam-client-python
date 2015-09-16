@@ -1,0 +1,170 @@
+import unittest
+
+from iobeam import iobeam
+from iobeam.resources import data
+
+class TestClientBuilder(unittest.TestCase):
+
+    def test_constructor(self):
+        builder = iobeam.ClientBuilder(1, "dummy")
+        self.assertEqual(1, builder._projectId)
+        self.assertEqual("dummy", builder._projectToken)
+
+    def test_constructorFails(self):
+        def verify(pid, token):
+            try:
+                builder = iobeam.ClientBuilder(pid, token)
+                self.assertTrue(False)
+            except ValueError:
+                pass
+
+        # Bad project ids
+        bads = [None, "1", 0]
+        for p in bads:
+            verify(p, "dummy")
+
+        # Bad tokens
+        bads = [None, 1, ""]
+        for t in bads:
+            verify(1, t)
+
+
+    def test_buildBasic(self):
+        builder = iobeam.ClientBuilder(1, "dummy")
+        client = builder.build()
+
+        self.assertTrue(client is not None)
+        self.assertTrue(isinstance(client, iobeam._Client))
+        self.assertEqual(1, client.projectId)
+        self.assertEqual("dummy", client.projectToken)
+        self.assertTrue(client.getDeviceId() is None)
+        self.assertFalse(client.isRegistered())
+
+
+class TestClient(unittest.TestCase):
+
+    def _testClientState(self, client, pid, ptoken, path):
+        self.assertEqual(pid, client.projectId)
+        self.assertEqual(ptoken, client.projectToken)
+        self.assertEqual(path, client._path)
+        self.assertEqual(0, len(client._dataset))
+
+    def _makeTempClient(self, deviceId=None):
+        return iobeam._Client(None, 1, "dummy", None, deviceId=deviceId)
+
+    def test_constructorBasic(self):
+        client = iobeam._Client(None, 1, "dummy", None)
+        self._testClientState(client, 1, "dummy", None)
+        self.assertTrue(client._activeDevice is None)
+
+    def test_isRegistered(self):
+        client = self._makeTempClient()
+        self.assertFalse(client.isRegistered())
+        client.setDeviceId("fake")
+        self.assertTrue(client.isRegistered())
+
+        client = self._makeTempClient(deviceId="fake")
+        self.assertTrue(client.isRegistered())
+
+    def test_getAndSetDeviceId(self):
+        client = self._makeTempClient()
+        self.assertTrue(client.getDeviceId() is None)
+        client.setDeviceId("fake")
+        self.assertTrue(client.getDeviceId() is "fake")
+
+        client = self._makeTempClient(deviceId="fake")
+        self.assertTrue(client.getDeviceId() is "fake")
+        client.setDeviceId("fake2")
+        self.assertTrue(client.getDeviceId() is "fake2")
+        try:
+            client.setDeviceId(None)
+            self.assertTrue(False)
+        except ValueError:
+            pass
+
+    def test_addDataPointInvalid(self):
+        client = self._makeTempClient()
+        series = "test"
+        dp = iobeam.DataPoint(0)
+
+        # TODO Add method to abstract size of dataset
+        client.addDataPoint(None, dp)
+        self.assertEqual(0, len(client._dataset))
+
+        client.addDataPoint(1, dp)
+        self.assertEqual(0, len(client._dataset))
+
+        client.addDataPoint("", dp)
+        self.assertEqual(0, len(client._dataset))
+
+        client.addDataPoint(series, None)
+        self.assertEqual(0, len(client._dataset))
+
+        client.addDataPoint(series, "not a point")
+        self.assertEqual(0, len(client._dataset))
+
+    def test_addDataPoint(self):
+        client = self._makeTempClient()
+        series = "test"
+        vals = [0, 11, 28]
+
+        dp = iobeam.DataPoint(vals[0])
+        client.addDataPoint(series, dp)
+        self.assertEqual(1, len(client._dataset))
+        self.assertEqual(1, len(client._dataset[series]))
+        self.assertTrue(dp in client._dataset[series])
+
+        dp = iobeam.DataPoint(vals[1])
+        client.addDataPoint(series, dp)
+        self.assertEqual(1, len(client._dataset))
+        self.assertEqual(2, len(client._dataset[series]))
+        self.assertTrue(dp in client._dataset[series])
+
+        dp = iobeam.DataPoint(vals[2])
+        client.addDataPoint(series, dp)
+        self.assertEqual(1, len(client._dataset))
+        self.assertEqual(3, len(client._dataset[series]))
+        self.assertTrue(dp in client._dataset[series])
+
+    def test_addDataSeriesInvalid(self):
+        client = self._makeTempClient()
+
+        client.addDataSeries(None)
+        self.assertEqual(0, len(client._dataset))
+
+        client.addDataSeries("not a series")
+        self.assertEqual(0, len(client._dataset))
+
+        ds = iobeam.DataSeries("test", None)
+        client.addDataSeries(ds)
+        self.assertEqual(0, len(client._dataset))
+
+    def test_addDataSeries(self):
+        client = self._makeTempClient()
+        series = "test"
+
+        ds = data.makeUniformDataSeries(series, 0, 100, [0, 1, 2])
+        client.addDataSeries(ds)
+        self.assertEqual(1, len(client._dataset))
+        self.assertEqual(3, len(client._dataset[series]))
+        for p in ds.getPoints():
+            self.assertTrue(p in client._dataset[series])
+
+        ds = data.makeUniformDataSeries(series, 101, 200, [3, 4, 5])
+        client.addDataSeries(ds)
+        self.assertEqual(1, len(client._dataset))
+        self.assertEqual(6, len(client._dataset[series]))
+        for p in ds.getPoints():
+            self.assertTrue(p in client._dataset[series])
+
+
+    def test_clearSeries(self):
+        client = self._makeTempClient()
+        series = "test"
+
+        dp = iobeam.DataPoint(45)
+        client.addDataPoint(series, dp)
+        self.assertEqual(1, len(client._dataset))
+        self.assertEqual(1, len(client._dataset[series]))
+        client.clearSeries(series)
+        self.assertEqual(0, len(client._dataset))
