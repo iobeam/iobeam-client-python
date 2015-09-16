@@ -3,22 +3,57 @@ import unittest
 from iobeam.resources import data
 
 
+class TestTimestamp(unittest.TestCase):
+
+    def test_impliedConstructor(self):
+        ts = data.Timestamp(5)
+        self.assertEqual(ts._type, data.TimeUnit.MILLISECONDS)
+        self.assertEqual(ts.asMicroseconds(), 5000)
+
+    def test_asMicroseconds(self):
+        secTs = data.Timestamp(5, data.TimeUnit.SECONDS)
+        msecTs = data.Timestamp(5, data.TimeUnit.MILLISECONDS)
+        usecTs = data.Timestamp(5, data.TimeUnit.MICROSECONDS)
+
+        self.assertEqual(5000000, secTs.asMicroseconds())
+        self.assertEqual(5000, msecTs.asMicroseconds())
+        self.assertEqual(5, usecTs.asMicroseconds())
+
+
 class TestDataPoint(unittest.TestCase):
 
-    def test_fullConstructor(self):
+    def test_fullConstructorWithInts(self):
         dp = data.DataPoint(5, timestamp=10)
         self.assertEqual(5, dp._value)
-        self.assertEqual(10, dp._timestamp)
-        self.assertEqual("DataPoint{timestamp: 10, value: 5}", str(dp))
+        self.assertEqual(data.Timestamp(10, data.TimeUnit.MILLISECONDS),
+                         dp._timestamp)
+        self.assertEqual("DataPoint{timestamp: 10000, value: 5}", str(dp))
 
         dp = data.DataPoint(5.0, timestamp=11)
         self.assertEqual(5.0, dp._value)
-        self.assertEqual(11, dp._timestamp)
+        self.assertEqual(data.Timestamp(11, data.TimeUnit.MILLISECONDS),
+                         dp._timestamp)
+
+    def test_fullConstructorWithTimestamps(self):
+        ts = data.Timestamp(5, data.TimeUnit.MICROSECONDS)
+        dp = data.DataPoint(5, timestamp=ts)
+        self.assertEqual(5, dp._value)
+        self.assertEqual(data.Timestamp(5, data.TimeUnit.MICROSECONDS),
+                         dp._timestamp)
+        self.assertEqual("DataPoint{timestamp: 5, value: 5}", str(dp))
 
     def test_impliedConstructor(self):
         dp = data.DataPoint(50)
         self.assertEqual(50, dp._value)
         self.assertTrue(dp._timestamp is not None)
+
+    def test_constructorError(self):
+        try:
+            dp = data.DataPoint(5, timestamp="now")
+            self.assertTrue(False)
+        except ValueError as e:
+            self.assertEqual("invalid type for timestamp: {}".format(
+                type("now")), str(e))
 
     def test_invalidTimestamp(self):
         try:
@@ -38,7 +73,7 @@ class TestDataPoint(unittest.TestCase):
         dp = data.DataPoint(5, timestamp=10)
         ret = dp.toDict()
         self.assertEqual(2, len(ret))
-        self.assertEqual(10, ret["time"])
+        self.assertEqual(10000, ret["time"])
         self.assertEqual(5, ret["value"])
 
 

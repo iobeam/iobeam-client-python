@@ -29,7 +29,10 @@ class ImportService(service.EndpointService):
     def _makeRequest(projectId, deviceId, dataset):
         sources = []
         req = {
-            "project_id": projectId, "device_id": deviceId, "sources": sources
+            "project_id": projectId,
+            "device_id": deviceId,
+            "sources": sources,
+            "timefmt": "usec"
         }
         for series in dataset:
             pts = []
