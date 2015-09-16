@@ -170,6 +170,30 @@ data points to the same `iobeam.Iobeam`:
     iobeamClient.addDataPoint("temperature", dt)
     iobeamClient.addDataPoint("humidity", dh)
 
+### Timestamps
+
+By default, if you pass just an integer for timestamp when
+constructing an `iobeam.DataPoint`, it will assume it is in
+milliseconds. To specify other precisions, you need to use the
+`iobeam.Timestamp` and `iobeam.TimeUnit` classes:
+
+    # Timestamps in seconds:
+    now = int(time.time())
+    ts = iobeam.Timestamp(now, iobeam.TimeUnit.SECONDS)
+    dp = iobeam.DataPoint(t, timestamp=ts)
+
+    # Another way to do milliseconds:
+    now = int(time.time() * 1000)
+    ts = iobeam.Timestamp(now, iobeam.TimeUnit.MILLISECONDS)
+    dp = iobeam.DataPoint(t, timestamp=ts)
+
+    # Timestamps in microseconds:
+    now = int(time.time() * 1000000)
+    ts = iobeam.Timestamp(now, iobeam.TimeUnit.MICROSECONDS)
+    dp = iobeam.DataPoint(t, timestamp=ts)
+
+Currently we support expressing timestamps in seconds, milliseconds,
+and microseconds.
 
 ### Connecting to the iobeam backend
 
