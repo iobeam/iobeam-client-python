@@ -2,6 +2,7 @@ import unittest
 
 from iobeam.endpoints import imports
 from iobeam.resources import data
+from tests.http import dummy_backend
 from tests.http import request
 
 _PROJECT_ID = 0
@@ -10,38 +11,7 @@ _TOKEN = "dummy"
 
 ImportService = imports.ImportService
 DataPoint = data.DataPoint
-
-
-class DummyImportService(request.DummyRequest):
-
-    def __init__(self):
-        request.DummyRequest.__init__(self, None, None)
-        self.reset()
-
-    def dummyExecute(self, url, params=None, headers=None, json=None):
-        class Resp(dict):
-            __getattr__, __setattr__ = dict.get, dict.__setitem__
-
-            def json(self):
-                return self
-        self.lastParams = params
-        self.lastHeaders = headers
-        self.lastJson = json
-        self.calls += 1
-
-        if "imports" in url:
-            return Resp(self.importData())
-        else:
-            return None
-
-    def importData(self):
-        return {"status_code": 200}
-
-    def reset(self):
-        self.lastParams = None
-        self.lastHeaders = None
-        self.lastJson = None
-        self.calls = 0
+DummyBackend = dummy_backend.DummyBackend
 
 
 def makeLinearDataSeries(limit):
@@ -149,7 +119,7 @@ class TestImportService(unittest.TestCase):
         self._basicRequestListChecks(reqList, 3)
 
     def test_importDataSimple(self):
-        dummy = DummyImportService()
+        dummy = DummyBackend()
         service = ImportService(_TOKEN, requester=request.DummyRequester(dummy))
         self.assertEqual(_TOKEN, service.token)
         self.assertTrue(service._requester is not None)
@@ -171,7 +141,7 @@ class TestImportService(unittest.TestCase):
 
     def test_importDataComplex(self):
         LIMIT = ImportService._BATCH_SIZE
-        dummy = DummyImportService()
+        dummy = DummyBackend()
         service = ImportService(_TOKEN, requester=request.DummyRequester(dummy))
         self.assertEqual(_TOKEN, service.token)
         self.assertTrue(service._requester is not None)

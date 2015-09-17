@@ -2,6 +2,7 @@ import unittest
 
 from iobeam.endpoints import devices
 from iobeam.resources import device
+from tests.http import dummy_backend
 from tests.http import request
 
 _PROJECT_ID = 0
@@ -15,65 +16,13 @@ _NONE_DEVICE_NAME = "dummy_name"
 
 DeviceService = devices.DeviceService
 Device = device.Device
+DummyBackend = dummy_backend.DummyBackend
 
-class DummyDeviceService(request.DummyRequest):
-
-    def __init__(self):
-        request.DummyRequest.__init__(self, None, None)
-        self.reset()
-
-    def dummyExecute(self, url, params=None, headers=None, json=None):
-        class Resp(dict):
-            __getattr__, __setattr__ = dict.get, dict.__setitem__
-
-            def json(self):
-                return self
-
-        self.lastParams = params
-        self.lastHeaders = headers
-        self.lastJson = json
-        self.calls += 1
-
-        if "devices/timestamp" in url:
-            return Resp(self.getTimestamp())
-        elif "devices" in url:
-            did = None
-            dname = None
-            if "device_id" in self.body:
-                did = self.body["device_id"]
-            if "device_name" in self.body:
-                dname = self.body["device_name"]
-            return Resp(self.registerDevice(deviceId=did, deviceName=dname))
-        else:
-            return None
-
-    def getTimestamp(self):
-        return {"status_code": 200, "server_timestamp": _TIMESTAMP}
-
-    def registerDevice(self, deviceId=None, deviceName=None):
-        did = deviceId or _NONE_DEVICE_ID
-        dname = deviceName or _NONE_DEVICE_NAME
-        # For compatibility with both Python 2 and 3.
-        try:
-            unicode
-        except NameError:
-            unicode = str  # Python3
-        return {
-            "status_code": 201,
-            "device_id": unicode(did),
-            "device_name": unicode(dname)
-        }
-
-    def reset(self):
-        self.lastParams = None
-        self.lastHeaders = None
-        self.lastJson = None
-        self.calls = 0
 
 class TestDeviceService(unittest.TestCase):
 
     def test_getTimestamp(self):
-        dummy = DummyDeviceService()
+        dummy = DummyBackend(timestampReturn=_TIMESTAMP)
         service = DeviceService(_TOKEN, requester=request.DummyRequester(dummy))
         self.assertEqual(_TOKEN, service.token)
         self.assertTrue(service._requester is not None)
@@ -89,7 +38,8 @@ class TestDeviceService(unittest.TestCase):
         self.assertEqual(dname, ret.deviceName)
 
     def test_registerDeviceNone(self):
-        dummy = DummyDeviceService()
+        registerReturn = (_NONE_DEVICE_ID, _NONE_DEVICE_NAME)
+        dummy = DummyBackend(registerReturn=registerReturn)
         service = DeviceService(_TOKEN, requester=request.DummyRequester(dummy))
         self.assertEqual(_TOKEN, service.token)
         self.assertTrue(service._requester is not None)
@@ -99,7 +49,8 @@ class TestDeviceService(unittest.TestCase):
         self.assertEqual(1, dummy.calls)
 
     def test_registerDevice(self):
-        dummy = DummyDeviceService()
+        registerReturn = (_NONE_DEVICE_ID, _NONE_DEVICE_NAME)
+        dummy = DummyBackend(registerReturn=registerReturn)
         service = DeviceService(_TOKEN, requester=request.DummyRequester(dummy))
         self.assertEqual(_TOKEN, service.token)
         self.assertTrue(service._requester is not None)
