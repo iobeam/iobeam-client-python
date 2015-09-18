@@ -5,6 +5,19 @@ from iobeam.resources import data
 
 class TestTimestamp(unittest.TestCase):
 
+    def test_invalidValues(self):
+        def verify(val):
+            try:
+                ts = data.Timestamp(val)
+                self.assertTrue(False)
+            except ValueError:
+                pass
+
+        verify(None)
+        verify("not an int")
+        verify("5")
+        verify(5.5)
+
     def test_impliedConstructor(self):
         ts = data.Timestamp(5)
         self.assertEqual(ts._type, data.TimeUnit.MILLISECONDS)
