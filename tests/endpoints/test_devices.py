@@ -1,5 +1,6 @@
 import unittest
 
+from iobeam.http import request as req
 from iobeam.endpoints import devices
 from iobeam.resources import device
 from tests.http import dummy_backend
@@ -21,11 +22,17 @@ DummyBackend = dummy_backend.DummyBackend
 
 class TestDeviceService(unittest.TestCase):
 
+    def test_createService(self):
+        registerReturn = (_NONE_DEVICE_ID, _NONE_DEVICE_NAME)
+        dummy = DummyBackend(registerReturn=registerReturn)
+        service = DeviceService(_TOKEN, requester=request.DummyRequester(dummy))
+        self.assertEqual(_TOKEN, service.token)
+        self.assertTrue(service.requester() is not None)
+        self.assertTrue(isinstance(service.requester(), request.DummyRequester))
+
     def test_getTimestamp(self):
         dummy = DummyBackend(timestampReturn=_TIMESTAMP)
         service = DeviceService(_TOKEN, requester=request.DummyRequester(dummy))
-        self.assertEqual(_TOKEN, service.token)
-        self.assertTrue(service._requester is not None)
 
         ret = service.getTimestamp()
         self.assertEqual(_TIMESTAMP, ret)
@@ -41,8 +48,6 @@ class TestDeviceService(unittest.TestCase):
         registerReturn = (_NONE_DEVICE_ID, _NONE_DEVICE_NAME)
         dummy = DummyBackend(registerReturn=registerReturn)
         service = DeviceService(_TOKEN, requester=request.DummyRequester(dummy))
-        self.assertEqual(_TOKEN, service.token)
-        self.assertTrue(service._requester is not None)
 
         ret = service.registerDevice(1)
         self._checkDevice(ret, 1, _NONE_DEVICE_ID, _NONE_DEVICE_NAME)
@@ -52,8 +57,6 @@ class TestDeviceService(unittest.TestCase):
         registerReturn = (_NONE_DEVICE_ID, _NONE_DEVICE_NAME)
         dummy = DummyBackend(registerReturn=registerReturn)
         service = DeviceService(_TOKEN, requester=request.DummyRequester(dummy))
-        self.assertEqual(_TOKEN, service.token)
-        self.assertTrue(service._requester is not None)
 
         ret = service.registerDevice(1, deviceId="a_given_id")
         self._checkDevice(ret, 1, "a_given_id", _NONE_DEVICE_NAME)
@@ -74,5 +77,44 @@ class TestDeviceService(unittest.TestCase):
         self.assertEqual(3, dummy.calls)
         body = dummy.lastJson
         self.assertEqual("a_given_name2", body["device_name"])
+
+    def test_registerDeviceDupeId(self):
+        registerReturn = (_NONE_DEVICE_ID, _NONE_DEVICE_NAME)
+        dummy = DummyBackend(registerReturn=registerReturn)
+        service = DeviceService(_TOKEN, requester=request.DummyRequester(dummy))
+
+        regId = "a_given_id"
+        ret = service.registerDevice(1, deviceId=regId)
+        self._checkDevice(ret, 1, regId, _NONE_DEVICE_NAME)
+        self.assertEqual(1, dummy.calls)
+        body = dummy.lastJson
+        self.assertEqual(regId, body["device_id"])
+
+        try:
+            ret = service.registerDevice(1, deviceId=regId)
+            self.assertTrue(False)
+        except req.Error as e:
+            self.assertEqual(2, dummy.calls)
+            self.assertEqual("Received unexpected code: 422", str(e))
+
+    def test_registerDeviceDupeName(self):
+        registerReturn = (_NONE_DEVICE_ID, _NONE_DEVICE_NAME)
+        dummy = DummyBackend(registerReturn=registerReturn)
+        service = DeviceService(_TOKEN, requester=request.DummyRequester(dummy))
+
+        regName = "a_given_name"
+        ret = service.registerDevice(1, deviceName=regName)
+        self._checkDevice(ret, 1, _NONE_DEVICE_ID, regName)
+        self.assertEqual(1, dummy.calls)
+        body = dummy.lastJson
+        self.assertEqual(regName, body["device_name"])
+
+        try:
+            ret = service.registerDevice(1, deviceName=regName)
+            self.assertTrue(False)
+        except req.Error as e:
+            self.assertEqual(2, dummy.calls)
+            self.assertEqual("Received unexpected code: 422", str(e))
+
 
     # TODO test error conditions

@@ -11,6 +11,8 @@ class DummyBackend(request.DummyRequest):
         else:
             self._timestamp = int(timestampReturn)
 
+        self._registeredIds = set()
+        self._registeredNames = set()
         if registerReturn is None:
             self._register = ("break", "test")
         else:
@@ -52,6 +54,15 @@ class DummyBackend(request.DummyRequest):
     def registerDevice(self, deviceId=None, deviceName=None):
         did = deviceId or self._register[0]
         dname = deviceName or self._register[1]
+
+        if did in self._registeredIds or dname in self._registeredNames:
+            return {
+                "status_code": 422,
+                "message": "duplicate id or name"
+            }
+        self._registeredIds.add(did)
+        self._registeredNames.add(dname)
+
         # For compatibility with both Python 2 and 3.
         try:
             unicode

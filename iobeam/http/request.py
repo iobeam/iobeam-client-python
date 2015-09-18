@@ -19,10 +19,7 @@ class Requester(object):
 
 class UnauthorizedError(Exception):
     def __init__(self, value):
-        self.value = "Unauthorized: {}".format(value)
-
-    def __str__(self):
-        return repr(self.value)
+        Exception.__init__(self, value)
 
     @staticmethod
     def noTokenSet():
@@ -30,11 +27,7 @@ class UnauthorizedError(Exception):
 
 class Error(Exception):
     def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
-
+        Exception.__init__(self, value)
 
 class Request(object):
 
