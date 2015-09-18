@@ -23,6 +23,7 @@ class DummyBackend(request.DummyRequest):
             def json(self):
                 return self
 
+        self.lastUrl = url
         self.lastParams = params
         self.lastHeaders = headers
         self.lastJson = json
@@ -40,6 +41,8 @@ class DummyBackend(request.DummyRequest):
             return Resp(self.registerDevice(deviceId=did, deviceName=dname))
         elif url.endswith("/imports"):
             return Resp(self.importData())
+        elif "/exports" in url:
+            return Resp(self.getData())
         else:
             return None
 
@@ -63,7 +66,11 @@ class DummyBackend(request.DummyRequest):
     def importData(self):
         return {"status_code": 200}
 
+    def getData(self):
+        return {"status_code": 200}
+
     def reset(self):
+        self.lastUrl = None
         self.lastParams = None
         self.lastHeaders = None
         self.lastJson = None
