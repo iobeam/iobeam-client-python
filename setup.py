@@ -12,8 +12,16 @@ from codecs import open
 import sys
 
 install_requires = ['requests']
-if sys.version_info < (3, 4):
-    install_requires.append('enum34')
+if "--python-tag" in sys.argv:
+    i = 0
+    while i < len(sys.argv):
+        if sys.argv[i] == "--python-tag":
+            break
+        i += 1
+    i += 1
+    if i <= len(sys.argv):
+        if sys.argv[i] != "py35":
+            install_requires.append('enum34')
 
 setup(
     name='iobeam',
@@ -21,7 +29,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.4.2',
+    version='0.4.3',
 
     description='Library for connecting to iobeam, the data analysis \
     platform for the Internet of Things.',
@@ -56,6 +64,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5'
     ],
 
     # What does your project relate to?
