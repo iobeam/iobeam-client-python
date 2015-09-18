@@ -8,7 +8,7 @@ from tests.http import request
 
 _PROJECT_ID = 0
 _DEVICE_ID = "test_id"
-_TOKEN = "dummy"
+_TOKEN = dummy_backend.TOKEN
 
 _TIMESTAMP = 5
 
@@ -36,6 +36,14 @@ class TestDeviceService(unittest.TestCase):
 
         ret = service.getTimestamp()
         self.assertEqual(_TIMESTAMP, ret)
+        self.assertEqual(1, dummy.calls)
+
+    def test_getTimestampBadToken(self):
+        dummy = DummyBackend(timestampReturn=_TIMESTAMP)
+        service = DeviceService("wrong", requester=request.DummyRequester(dummy))
+
+        ret = service.getTimestamp()
+        self.assertEqual(-1, ret)
         self.assertEqual(1, dummy.calls)
 
     def _checkDevice(self, ret, pid, did, dname):
@@ -116,5 +124,14 @@ class TestDeviceService(unittest.TestCase):
             self.assertEqual(2, dummy.calls)
             self.assertEqual("Received unexpected code: 422", str(e))
 
+    def test_registerBadToken(self):
+        registerReturn = (_NONE_DEVICE_ID, _NONE_DEVICE_NAME)
+        dummy = DummyBackend(registerReturn=registerReturn)
+        service = DeviceService("wrong", requester=request.DummyRequester(dummy))
 
-    # TODO test error conditions
+        regId = "a_given_id"
+        try:
+            ret = service.registerDevice(1, deviceId=regId)
+            self.assertTrue(False)
+        except req.UnauthorizedError:
+            self.assertEqual(1, dummy.calls)

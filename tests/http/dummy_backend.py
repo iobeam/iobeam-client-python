@@ -1,6 +1,9 @@
 from tests.http import request
 from time import time
 
+AUTH = "Authorization"
+TOKEN = "dummy"
+
 class DummyBackend(request.DummyRequest):
 
     def __init__(self, timestampReturn=None, registerReturn=None):
@@ -30,6 +33,12 @@ class DummyBackend(request.DummyRequest):
         self.lastHeaders = headers
         self.lastJson = json
         self.calls += 1
+
+        if AUTH not in headers or (headers[AUTH] != "Bearer {}".format(TOKEN)):
+            return Resp({
+                "status_code": 403,
+                "message": "bad token"
+            })
 
         if url.endswith("/devices/timestamp"):
             return Resp(self.getTimestamp())
