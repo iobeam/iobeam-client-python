@@ -5,6 +5,24 @@ Represents a data query.
 '''
 class Query(object):
 
+    @staticmethod
+    def _validIntOrRaise(val, msg):
+        if val is None:
+            return False
+        elif not isinstance(val, int):
+            raise ValueError(msg)
+        else:
+            return True
+
+    @staticmethod
+    def _validPositiveIntOrRaise(val, msg):
+        if not Query._validIntOrRaise(val, msg):
+            return False
+        elif val > 0:
+            return True
+        else:
+            raise ValueError(msg)
+
     def __init__(self, projectId, deviceId=None, seriesName=None):
         utils.checkValidProjectId(projectId)
 
@@ -20,8 +38,8 @@ class Query(object):
         String of format <projectId>/<deviceId or 'all'>/<seriesName or 'all'>
     '''
     def getUrl(self):
-        did = self._did if self._did is not None else "all"
-        series = self._series if self._series is not None else "all"
+        did = self._did or "all"
+        series = self._series or "all"
         return "{}/{}/{}".format(self._pid, did, series)
 
     def getParams(self):
@@ -31,70 +49,52 @@ class Query(object):
     Sets the limit of this query, i.e., the max number of results series.
     '''
     def limit(self, limit):
-        if limit is None:
-            return self
-        if not isinstance(limit, int) or not limit > 0:
-            raise ValueError("limit must be a positive int")
-
-        self._params["limit"] = limit
+        msg = "limit must be a positive int"
+        if Query._validPositiveIntOrRaise(limit, msg):
+            self._params["limit"] = limit
         return self
 
     '''
     Sets the from time limit for results.
     '''
     def fromTime(self, time):
-        if time is None:
-            return self
-        elif not isinstance(time, int):
-            raise ValueError("time must be an int (milliseconds from epoch)")
-
-        self._params["from"] = time
+        msg = "time must be an int (milliseconds from epoch)"
+        if Query._validIntOrRaise(time, msg):
+            self._params["from"] = time
         return self
 
     '''
     Sets the to time limit for results.
     '''
     def toTime(self, time):
-        if time is None:
-            return self
-        elif not isinstance(time, int):
-            raise ValueError("time must be an int (milliseconds from epoch)")
-
-        self._params["to"] = time
+        msg = "time must be an int (milliseconds from epoch)"
+        if Query._validIntOrRaise(time, msg):
+            self._params["to"] = time
         return self
 
     '''
     Sets the max value for values in the results.
     '''
     def lessThan(self, value):
-        if value is None:
-            return self
-        elif not isinstance(value, int):
-            raise ValueError("value must be an int")
-
-        self._params["less_than"] = value
+        msg = "value must be an int"
+        if Query._validIntOrRaise(value, msg):
+            self._params["less_than"] = value
         return self
 
     '''
     Sets the min value for values in the results.
     '''
     def greaterThan(self, value):
-        if value is None:
-            return self
-        elif not isinstance(value, int):
-            raise ValueError("value must be an int")
-
-        self._params["greater_than"] = value
+        msg = "value must be an int"
+        if Query._validIntOrRaise(value, msg):
+            self._params["greater_than"] = value
         return self
 
     '''
     Sets the value that all results must equal.
     '''
     def equals(self, value):
-        if value is None:
-            return self
-        elif not isinstance(value, int):
-            raise ValueError("value must be an int")
-
-        self._params["equals"] = value
+        msg = "value must be an int"
+        if Query._validIntOrRaise(value, msg):
+            self._params["equals"] = value
         return self
