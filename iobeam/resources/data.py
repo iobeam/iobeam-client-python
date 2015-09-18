@@ -9,6 +9,8 @@ class TimeUnit(Enum):
 class Timestamp(object):
 
     def __init__(self, value, type=TimeUnit.MILLISECONDS):
+        if value is None or not isinstance(value, int):
+            raise ValueError("timestamp value must be an int")
         self._value = value
         self._type = type
 
