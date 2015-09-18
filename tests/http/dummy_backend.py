@@ -3,23 +3,18 @@ from time import time
 
 AUTH = "Authorization"
 TOKEN = "dummy"
+_STATUS_CODE = "status_code"
 
 class DummyBackend(request.DummyRequest):
 
     def __init__(self, timestampReturn=None, registerReturn=None):
         request.DummyRequest.__init__(self, None, None)
         self.reset()
-        if timestampReturn is None:
-            self._timestamp = int(time() * 1000)
-        else:
-            self._timestamp = int(timestampReturn)
-
         self._registeredIds = set()
         self._registeredNames = set()
-        if registerReturn is None:
-            self._register = ("break", "test")
-        else:
-            self._register = registerReturn
+
+        self._timestamp = int(timestampReturn or time() * 1000)
+        self._register = registerReturn or ("break", "test")
 
     def dummyExecute(self, url, params=None, headers=None, json=None):
         class Resp(dict):
@@ -36,19 +31,16 @@ class DummyBackend(request.DummyRequest):
 
         if AUTH not in headers or (headers[AUTH] != "Bearer {}".format(TOKEN)):
             return Resp({
-                "status_code": 403,
+                _STATUS_CODE: 403,
                 "message": "bad token"
             })
 
         if url.endswith("/devices/timestamp"):
             return Resp(self.getTimestamp())
         elif url.endswith("/devices"):
-            did = None
-            dname = None
-            if "device_id" in self.body:
-                did = self.body["device_id"]
-            if "device_name" in self.body:
-                dname = self.body["device_name"]
+            body = self.body
+            did = body["device_id"] if "device_id" in body else None
+            dname = body["device_name"] if "device_name" in body else None
             return Resp(self.registerDevice(deviceId=did, deviceName=dname))
         elif url.endswith("/imports"):
             return Resp(self.importData())
@@ -58,7 +50,10 @@ class DummyBackend(request.DummyRequest):
             return None
 
     def getTimestamp(self):
-        return {"status_code": 200, "server_timestamp": self._timestamp}
+        return {
+            _STATUS_CODE: 200,
+            "server_timestamp": self._timestamp
+        }
 
     def registerDevice(self, deviceId=None, deviceName=None):
         did = deviceId or self._register[0]
@@ -66,7 +61,7 @@ class DummyBackend(request.DummyRequest):
 
         if did in self._registeredIds or dname in self._registeredNames:
             return {
-                "status_code": 422,
+                _STATUS_CODE: 422,
                 "message": "duplicate id or name"
             }
         self._registeredIds.add(did)
@@ -78,16 +73,16 @@ class DummyBackend(request.DummyRequest):
         except NameError:
             unicode = str  # Python3
         return {
-            "status_code": 201,
+            _STATUS_CODE: 201,
             "device_id": unicode(did),
             "device_name": unicode(dname)
         }
 
     def importData(self):
-        return {"status_code": 200}
+        return {_STATUS_CODE: 200}
 
     def getData(self):
-        return {"status_code": 200}
+        return {_STATUS_CODE: 200}
 
     def reset(self):
         self.lastUrl = None
