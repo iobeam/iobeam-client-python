@@ -1,6 +1,9 @@
 from tests.http import request
 from time import time
 
+AUTH = "Authorization"
+TOKEN = "dummy"
+
 class DummyBackend(request.DummyRequest):
 
     def __init__(self, timestampReturn=None, registerReturn=None):
@@ -11,6 +14,8 @@ class DummyBackend(request.DummyRequest):
         else:
             self._timestamp = int(timestampReturn)
 
+        self._registeredIds = set()
+        self._registeredNames = set()
         if registerReturn is None:
             self._register = ("break", "test")
         else:
@@ -28,6 +33,12 @@ class DummyBackend(request.DummyRequest):
         self.lastHeaders = headers
         self.lastJson = json
         self.calls += 1
+
+        if AUTH not in headers or (headers[AUTH] != "Bearer {}".format(TOKEN)):
+            return Resp({
+                "status_code": 403,
+                "message": "bad token"
+            })
 
         if url.endswith("/devices/timestamp"):
             return Resp(self.getTimestamp())
@@ -52,6 +63,15 @@ class DummyBackend(request.DummyRequest):
     def registerDevice(self, deviceId=None, deviceName=None):
         did = deviceId or self._register[0]
         dname = deviceName or self._register[1]
+
+        if did in self._registeredIds or dname in self._registeredNames:
+            return {
+                "status_code": 422,
+                "message": "duplicate id or name"
+            }
+        self._registeredIds.add(did)
+        self._registeredNames.add(dname)
+
         # For compatibility with both Python 2 and 3.
         try:
             unicode
