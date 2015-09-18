@@ -6,8 +6,22 @@ class TimeUnit(Enum):
     MICROSECONDS = 1
     SECONDS = 2
 
+
+'''
+Represents a timestamp, using a value and TimeUnit.
+'''
 class Timestamp(object):
 
+    '''
+    Constructor of a Timestamp.
+
+    Params:
+        value - Numeric value of the timestamp. Must be an integer.
+                Precision is supported by using a different TimeUnit,
+                i.e., 5.5 seconds should be created as 5500 milliseconds
+                or 5500000 microseconds.
+        type - TimeUnit to use for the given value
+    '''
     def __init__(self, value, type=TimeUnit.MILLISECONDS):
         if value is None or not isinstance(value, int):
             raise ValueError("timestamp value must be an int")
@@ -20,6 +34,15 @@ class Timestamp(object):
 
         return self.asMicroseconds() == other.asMicroseconds()
 
+    '''
+    This timestamp value represented in microseconds.
+
+    Returns:
+        Timestamp converted to an integral number of microseconds.
+        For timestamps with TimeUnit.MICROSECONDS, this is just the initial
+        value; for TimeUnit.MILLISECONDS, value * 1000; and for
+        TimeUnit.SECONDS, value * 1000000.
+    '''
     def asMicroseconds(self):
         if self._type == TimeUnit.MICROSECONDS:
             return self._value
@@ -29,6 +52,7 @@ class Timestamp(object):
             return int(self._value * 1000000)
         else:
             raise ValueError("unknown type")
+
 
 '''
 Represents a time-series datapoint, using a timestamp and value.
