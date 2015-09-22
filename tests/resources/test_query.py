@@ -16,6 +16,16 @@ class TestQuery(unittest.TestCase):
         self.assertTrue(q._series is None)
         self.assertEqual(0, len(q._params))
 
+    def test_constructorWithTimeUnit(self):
+        tu = query.TimeUnit.SECONDS
+        q = query.Query(_PROJECT_ID, timeUnit=tu)
+        self.assertEqual(_PROJECT_ID, q._pid)
+        self.assertTrue(q._did is None)
+        self.assertTrue(q._series is None)
+        self.assertEqual(1, len(q.getParams()))
+        self.assertTrue("timefmt" in q.getParams())
+        self.assertEqual(tu.value, q.getParams()["timefmt"])
+
     def test_invalidProjectId(self):
         # None is not a valid project id
         badId = None
@@ -48,6 +58,14 @@ class TestQuery(unittest.TestCase):
             self.assertTrue(False)
         except ValueError as e:
             self.assertEqual("projectId must be greater than 0", str(e))
+
+    def test_constructorInvalidTimeUnit(self):
+        tu = "fake"
+        try:
+            q = query.Query(_PROJECT_ID, timeUnit=tu)
+            self.assertTrue(False)
+        except ValueError:
+            self.assertTrue(True)
 
     def test_getUrl(self):
         ALL = "all"

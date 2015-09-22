@@ -2,9 +2,9 @@ from time import time
 from enum import Enum
 
 class TimeUnit(Enum):
-    MILLISECONDS = 0
-    MICROSECONDS = 1
-    SECONDS = 2
+    MILLISECONDS = "msec"
+    MICROSECONDS = "usec"
+    SECONDS = "sec"
 
 
 '''
