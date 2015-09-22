@@ -1,4 +1,8 @@
 from iobeam.utils import utils
+from iobeam.resources import data
+
+# alias query.TimeUnit to data.TimeUnit
+TimeUnit = data.TimeUnit
 
 '''
 Represents a data query.
@@ -23,13 +27,21 @@ class Query(object):
         else:
             raise ValueError(msg)
 
-    def __init__(self, projectId, deviceId=None, seriesName=None):
+    def __init__(self, projectId, deviceId=None, seriesName=None,
+                 timeUnit=TimeUnit.MILLISECONDS):
         utils.checkValidProjectId(projectId)
+        if timeUnit is None:
+            timeUnit = TimeUnit.MILLISECONDS
+        if not isinstance(timeUnit, TimeUnit):
+            raise ValueError("timeUnit must be a query.TimeUnit")
 
         self._pid = projectId
         self._did = deviceId
         self._series = seriesName
         self._params = {}
+        self._timeUnit = timeUnit
+        if timeUnit != TimeUnit.MILLISECONDS:
+            self._params["timefmt"] = str(timeUnit.value)
 
     '''
     Gets the resource locator portion of the exports API call
@@ -58,7 +70,7 @@ class Query(object):
     Sets the from time limit for results.
     '''
     def fromTime(self, time):
-        msg = "time must be an int (milliseconds from epoch)"
+        msg = "time must be an int ({} from epoch)".format(self._timeUnit.value)
         if Query._validIntOrRaise(time, msg):
             self._params["from"] = time
         return self
@@ -67,7 +79,7 @@ class Query(object):
     Sets the to time limit for results.
     '''
     def toTime(self, time):
-        msg = "time must be an int (milliseconds from epoch)"
+        msg = "time must be an int ({} from epoch)".format(self._timeUnit.value)
         if Query._validIntOrRaise(time, msg):
             self._params["to"] = time
         return self
