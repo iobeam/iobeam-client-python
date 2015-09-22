@@ -295,20 +295,30 @@ on the values you're interested in:
     # start with this basic query
     q = iobeam.QueryReq(PROJECT_ID, deviceId=DEVICE_ID, seriesName="temp")
 
-    # Last 5 results after a given START_TIME:
-    q = q.limit(5).fromTime(START_TIME)
+    # Last 5 results after a given START:
+    q = q.limit(5).fromTime(START)
 
     # All results between two times, START and END
     q = q.fromTime(START).toTime(END)
+    # OR...
+    q = q.inTimeRange(START, END)
 
     # All results where the value is greater than 0
     q = q.greaterThan(0)
+
+By default, time values are treated as milliseconds. If you'd like to
+use a different (seconds or microseconds) you can initialize the
+query like this:
+
+    q = iobeam.QueryReq(PROJECT_ID, timeUnit=iobeam.TimeUnit.MICROSECONDS)
+
 
 The full list of (chainable) parameters:
 
     limit(limit)
     fromTime(time)
     toTime(time)
+    inTimeRange(startTime, endTime)  # combines prev two
     greaterThan(value)
     lessThan(value)
     equals(value)
