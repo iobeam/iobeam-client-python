@@ -78,9 +78,12 @@ class TestQuery(unittest.TestCase):
         self.assertEqual(0, len(q.getParams()))
         self.assertEqual(q, ret)
 
-    def _checkInvalid(self, func, value):
+    def _checkInvalid(self, func, value, value2=None):
         try:
-            func(value)
+            if value2 is None:
+                func(value)
+            else:
+                func(value, value2)
             self.assertTrue(False)
         except ValueError as e:
             pass
@@ -120,6 +123,24 @@ class TestQuery(unittest.TestCase):
 
         # Failure case: non-int
         self._checkInvalid(q.toTime, "junk")
+
+    def test_inTimeRange(self):
+        q = query.Query(_PROJECT_ID)
+        ret = q.inTimeRange(None, None)
+        self.assertEqual(0, len(q.getParams()))
+        self.assertEqual(q, ret)
+
+        ret = q.inTimeRange(0, 123)
+        self.assertEqual(2, len(q.getParams()))
+        self.assertEqual(0, q.getParams()["from"])
+        self.assertEqual(123, q.getParams()["to"])
+
+        # Failure case: non-int for either/both
+        self._checkInvalid(q.inTimeRange, "junk", 500)
+        self._checkInvalid(q.inTimeRange, 0, "junk")
+        self._checkInvalid(q.inTimeRange, "junk", "junk2")
+        # Failure case: end < start
+        self._checkInvalid(q.inTimeRange, 500, 0)
 
     def test_greaterThan(self):
         q = query.Query(_PROJECT_ID)

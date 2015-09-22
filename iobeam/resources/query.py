@@ -84,6 +84,14 @@ class Query(object):
             self._params["to"] = time
         return self
 
+    def inTimeRange(self, start, end):
+        self.fromTime(start).toTime(end)
+        if end < start:
+            self._params.pop("from", None)
+            self._params.pop("to", None)
+            raise ValueError("end cannot be less than start")
+        return self
+
     '''
     Sets the max value for values in the results.
     '''
