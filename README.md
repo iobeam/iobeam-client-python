@@ -2,7 +2,7 @@
 
 **[iobeam](https://iobeam.com)** is a data platform for connected devices.
 
-This is a Python library for sending data to the **iobeam**.
+This is a Python library for sending data to **iobeam**.
 For more information on the iobeam, please [check our our documentation](https://docs.iobeam.com).
 
 *Please note that we are currently invite-only. You will need an invite
@@ -151,8 +151,8 @@ For each time-series data point, create a `iobeam.DataPoint` object:
     now = ... # e.g., now = int(time.time() * 1000) (import time first)
     d = iobeam.DataPoint(t, timestamp=now)
 
-(The timestamp provided should be in milliseconds since epoch. The value
-can be integral or real.)
+(The value can be integral or real. If the timestamp provided is an integer, it
+is assumed to be milliseconds; for other units, see the following section.)
 
 Now, pick a name for your data series (e.g., "temperature"), and add the
 `iobeam.DataPoint` under that series:
@@ -173,7 +173,7 @@ data points to the same `iobeam.Iobeam`:
 ### Timestamps
 
 By default, if you pass just an integer for timestamp when
-constructing an `iobeam.DataPoint`, it will assume it is in
+constructing an `iobeam.DataPoint`, it will set the unit as
 milliseconds. To specify other precisions, you need to use the
 `iobeam.Timestamp` and `iobeam.TimeUnit` classes:
 
