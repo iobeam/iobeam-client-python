@@ -85,11 +85,12 @@ class Query(object):
         return self
 
     def inTimeRange(self, start, end):
-        self.fromTime(start).toTime(end)
-        if end < start:
-            self._params.pop("from", None)
-            self._params.pop("to", None)
-            raise ValueError("end cannot be less than start")
+        if start is not None and end is not None:
+            self.fromTime(start).toTime(end)
+            if end < start:
+                self._params.pop("from", None)
+                self._params.pop("to", None)
+                raise ValueError("end cannot be less than start")
         return self
 
     '''
