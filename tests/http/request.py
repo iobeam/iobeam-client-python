@@ -4,6 +4,9 @@ from iobeam.http import request
 
 _BASE_URL = "https://api-dev.iobeam.com/v1/"
 
+UnauthorizedError = request.UnauthorizedError
+Error = request.Error
+
 
 '''
 Basic dummy request factory.

@@ -1,12 +1,10 @@
 import unittest
 
-from iobeam.http import request as req
 from iobeam.endpoints import devices
 from iobeam.resources import device
 from tests.http import dummy_backend
 from tests.http import request
 
-_PROJECT_ID = 0
 _DEVICE_ID = "test_id"
 _TOKEN = dummy_backend.TOKEN
 
@@ -101,7 +99,7 @@ class TestDeviceService(unittest.TestCase):
         try:
             ret = service.registerDevice(1, deviceId=regId)
             self.assertTrue(False)
-        except req.Error as e:
+        except request.Error as e:
             self.assertEqual(2, dummy.calls)
             self.assertEqual("Received unexpected code: 422", str(e))
 
@@ -120,7 +118,7 @@ class TestDeviceService(unittest.TestCase):
         try:
             ret = service.registerDevice(1, deviceName=regName)
             self.assertTrue(False)
-        except req.Error as e:
+        except request.Error as e:
             self.assertEqual(2, dummy.calls)
             self.assertEqual("Received unexpected code: 422", str(e))
 
@@ -133,5 +131,5 @@ class TestDeviceService(unittest.TestCase):
         try:
             ret = service.registerDevice(1, deviceId=regId)
             self.assertTrue(False)
-        except req.UnauthorizedError:
+        except request.UnauthorizedError:
             self.assertEqual(1, dummy.calls)

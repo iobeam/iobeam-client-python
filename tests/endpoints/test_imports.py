@@ -5,9 +5,9 @@ from iobeam.resources import data
 from tests.http import dummy_backend
 from tests.http import request
 
-_PROJECT_ID = 0
+_PROJECT_ID = 1
 _DEVICE_ID = "test_id"
-_TOKEN = "dummy"
+_TOKEN = dummy_backend.TOKEN
 
 ImportService = imports.ImportService
 DataPoint = data.DataPoint
@@ -155,4 +155,33 @@ class TestImportService(unittest.TestCase):
         self.assertTrue(extra is None)
         self.assertEqual(3, dummy.calls)
 
-    # TODO - test error conditions
+    def test_importBadToken(self):
+        dummy = DummyBackend()
+        service = ImportService("wrong",
+                                requester=request.DummyRequester(dummy))
+        dataset = {
+            "t": makeLinearDataSeries(10)
+        }
+
+        success, extra = service.importData(1, _DEVICE_ID, dataset)
+        self.assertFalse(success)
+        self.assertTrue(extra is not None)
+        self.assertEqual(403, extra.status_code)
+        self.assertEqual(1, dummy.calls)
+
+    def test_importBadRequest(self):
+        dummy = DummyBackend()
+        service = ImportService(_TOKEN, requester=request.DummyRequester(dummy))
+        class BrokenDataPoint(object):
+
+            def toDict(self):
+                return {"ts": "bad", "val": "bad"}
+        dataset = {
+            "t": [BrokenDataPoint()]
+        }
+
+        success, extra = service.importData(1, _DEVICE_ID, dataset)
+        self.assertFalse(success)
+        self.assertTrue(extra is not None)
+        self.assertEqual(400, extra.status_code)
+        self.assertEqual(1, dummy.calls)
