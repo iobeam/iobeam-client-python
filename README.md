@@ -23,9 +23,13 @@ installed. You can get it via pip:
 
     pip install requests
 
-Further, you need python **2.7.9+** or **3.4.3** (other versions of python3 may
-work, but it has only been tested on 3.4.3).
+Further, you need python **2.7.9+** or **3.4.3+** (earlier versions of python3 may
+work, but it has not been tested).
 
+If you are using Python2, or a version of Python3 earlier than 3.5, you will need
+the `enum34` library as well:
+
+    pip install enum34
 
 ## Installation
 
