@@ -116,8 +116,8 @@ it will get a new random ID from us. If you provide a _different_ `device_id` to
 **With a registered `device_id`**
 
 If you have registered a `device_id` (e.g. using our
-[CLI](https://github.com/iobeam/iobeam)), you can pass this in the
-constructor and skip the registration step.
+[CLI](https://github.com/iobeam/iobeam)), you can pass this to the `Builder` instead
+of registering:
 
     from iobeam import iobeam
 
