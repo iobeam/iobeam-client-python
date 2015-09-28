@@ -84,6 +84,13 @@ class Query(object):
             self._params["to"] = time
         return self
 
+    '''
+    Sets the time limits for results.
+
+    Params:
+        start - Beginning of time range to get results from
+        end - End of time range to get results from
+    '''
     def inTimeRange(self, start, end):
         if start is not None and end is not None:
             self.fromTime(start).toTime(end)
@@ -109,6 +116,22 @@ class Query(object):
         msg = "value must be an int"
         if Query._validIntOrRaise(value, msg):
             self._params["greater_than"] = value
+        return self
+
+    '''
+    Sets the value range for results.
+
+    Params:
+        min - Minimum value to have in results
+        max - Maximum value to have in results
+    '''
+    def inValueRange(self, min, max):
+        if min is not None and max is not None:
+            self.lessThan(max).greaterThan(min)
+            if max < min:
+                self._params.pop("less_than", None)
+                self._params.pop("greater_than", None)
+                raise ValueError("max value cannot be larger than min value")
         return self
 
     '''

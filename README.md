@@ -322,9 +322,10 @@ The full list of (chainable) parameters:
     limit(limit)
     fromTime(time)
     toTime(time)
-    inTimeRange(startTime, endTime)  # combines prev two
+    inTimeRange(startTime, endTime)  # combines previous two
     greaterThan(value)
     lessThan(value)
+    inValueRange(min, max)  # combines previous two
     equals(value)
 
 

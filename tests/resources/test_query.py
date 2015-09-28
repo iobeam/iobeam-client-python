@@ -164,6 +164,24 @@ class TestQuery(unittest.TestCase):
         # Failure case: non-int
         self._checkInvalid(q.lessThan, "junk")
 
+    def test_inValueRange(self):
+        q = query.Query(_PROJECT_ID)
+        ret = q.inValueRange(None, None)
+        self.assertEqual(0, len(q.getParams()))
+        self.assertEqual(q, ret)
+
+        ret = q.inValueRange(0, 123)
+        self.assertEqual(2, len(q.getParams()))
+        self.assertEqual(0, q.getParams()["greater_than"])
+        self.assertEqual(123, q.getParams()["less_than"])
+
+        # Failure case: non-int for either/both
+        self._checkInvalid(q.inValueRange, "junk", 500)
+        self._checkInvalid(q.inValueRange, 0, "junk")
+        self._checkInvalid(q.inValueRange, "junk", "junk2")
+        # Failure case: end < start
+        self._checkInvalid(q.inValueRange, 500, 0)
+
     def test_equals(self):
         q = query.Query(_PROJECT_ID)
         self.paramNoneTest(q, q.equals)
