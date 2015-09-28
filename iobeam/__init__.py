@@ -1,4 +1,4 @@
-import iobeam
+from . import iobeam
 
 ClientBuilder = iobeam.ClientBuilder
 MakeQuery = iobeam.MakeQuery
