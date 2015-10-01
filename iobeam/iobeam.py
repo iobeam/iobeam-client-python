@@ -249,7 +249,6 @@ class _Client(object):
         if backend is not None:
             requester = request.Requester(baseUrl=backend)
 
-        print(requester)
         service = exports.ExportService(token, requester=requester)
         return service.getData(query)
 
