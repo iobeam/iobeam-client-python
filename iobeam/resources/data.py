@@ -1,35 +1,38 @@
+"""Data types related to making data points and series."""
+# pylint: disable=too-few-public-methods
 from time import time
 from enum import Enum
 
 # For compatibility with both Python 2 and 3.
+# pylint: disable=redefined-builtin,invalid-name
 try:
-    long
+    xrange
 except NameError as e:
     long = int
+    xrange = range
+# pylint: enable=redefined-builtin,invalid-name
 
 
 class TimeUnit(Enum):
+    """Enum of different time units."""
     MILLISECONDS = "msec"
     MICROSECONDS = "usec"
     SECONDS = "sec"
 
-
-'''
-Represents a timestamp, using a value and TimeUnit.
-'''
 class Timestamp(object):
+    """Represents a timestamp, using a value and TimeUnit."""
 
-    '''
-    Constructor of a Timestamp.
-
-    Params:
-        value - Numeric value of the timestamp. Must be an integer.
-                Precision is supported by using a different TimeUnit,
-                i.e., 5.5 seconds should be created as 5500 milliseconds
-                or 5500000 microseconds.
-        type - TimeUnit to use for the given value
-    '''
+    # TODO change type to unit
     def __init__(self, value, type=TimeUnit.MILLISECONDS):
+        """Constructor of a Timestamp.
+
+        Params:
+            value - Numeric value of the timestamp. Must be an integer.
+                    Precision is supported by using a different TimeUnit,
+                    i.e., 5.5 seconds should be created as 5500 milliseconds
+                    or 5500000 microseconds.
+            type - TimeUnit to use for the given value
+        """
         if value is None or not isinstance(value, (int, long)):
             raise ValueError("timestamp value must be an int")
         self._value = value
@@ -41,16 +44,15 @@ class Timestamp(object):
 
         return self.asMicroseconds() == other.asMicroseconds()
 
-    '''
-    This timestamp value represented in microseconds.
-
-    Returns:
-        Timestamp converted to an integral number of microseconds.
-        For timestamps with TimeUnit.MICROSECONDS, this is just the initial
-        value; for TimeUnit.MILLISECONDS, value * 1000; and for
-        TimeUnit.SECONDS, value * 1000000.
-    '''
     def asMicroseconds(self):
+        """This timestamp value represented in microseconds.
+
+        Returns:
+            Timestamp converted to an integral number of microseconds.
+            For timestamps with TimeUnit.MICROSECONDS, this is just the initial
+            value; for TimeUnit.MILLISECONDS, value * 1000; and for
+            TimeUnit.SECONDS, value * 1000000.
+        """
         if self._type == TimeUnit.MICROSECONDS:
             return self._value
         elif self._type == TimeUnit.MILLISECONDS:
@@ -61,23 +63,20 @@ class Timestamp(object):
             raise ValueError("unknown type")
 
 
-'''
-Represents a time-series datapoint, using a timestamp and value.
-'''
 class DataPoint(object):
+    """Represents a time-series datapoint, using a timestamp and value."""
 
-    '''
-    Constructor of a DataPoint.
-
-    Takes in a value, which must be a number type, and optionally a
-    timestamp. If a timestamp is not supplied, the current time in
-    milliseconds is used.
-
-    Raises:
-        ValueError - If value is not a number (int/float) or timestamp is not an
-                     int.
-    '''
     def __init__(self, value, timestamp=None):
+        """Constructor of a DataPoint.
+
+        Takes in a value, which must be a number type, and optionally a
+        timestamp. If a timestamp is not supplied, the current time in
+        milliseconds is used.
+
+        Raises:
+            ValueError - If value is not a number (int/float) or timestamp is not an
+                         int.
+        """
         if not isinstance(value, (int, long, float)):
             raise ValueError("'value' must be a number.")
         if timestamp is None:
@@ -93,10 +92,8 @@ class DataPoint(object):
 
         self._value = value
 
-    '''
-    Prints out: DataPoint{timestamp: <timestamp>, value: <value>}
-    '''
     def __str__(self):
+        """Prints out: DataPoint{timestamp: <timestamp>, value: <value>}"""
         return "DataPoint{{timestamp: {}, value: {}}}".format(
             self._timestamp.asMicroseconds(), self._value)
 
@@ -109,49 +106,41 @@ class DataPoint(object):
     def __hash__(self):
         return self._timestamp.asMicroseconds() + self._value
 
-    '''
-    Converts to a dictionary that is usable for the imports API.
-
-    Returns:
-        Dictionary with keys 'time' and 'value'.
-    '''
     def toDict(self):
+        """Converts to a dictionary that is usable for the imports API.
+
+        Returns:
+            Dictionary with keys 'time' and 'value'.
+        """
         return {
             "time": self._timestamp.asMicroseconds(),
             "value": self._value
         }
 
-'''
-A collection of DataPoints for a given named series.
-'''
 class DataSeries(object):
+    """A collection of DataPoints for a given named series."""
 
-    '''
-    Constructor for DataSeries with a name and its points.
-
-    Params:
-        name - Name of the data series
-        points - DataPoints in the series
-
-    Throws:
-        ValueError - If `name` is None
-    '''
     def __init__(self, name, points):
+        """Constructor for DataSeries with a name and its points.
+
+        Params:
+            name - Name of the data series
+            points - DataPoints in the series
+
+        Throws:
+            ValueError - If `name` is None
+        """
         if name is None:
             raise ValueError("Name cannot be None")
         self._name = name
         self._points = list(points) if points is not None else []
 
-    '''
-    Returns the number of points in the series
-    '''
     def __len__(self):
+        """Returns the number of points in the series"""
         return len(self._points)
 
-    '''
-    Prints out: DataSeries{name: <name>, len: <size of points>}
-    '''
     def __str__(self):
+        """Prints out: DataSeries{name: <name>, len: <size of points>}"""
         return "DataSeries{{name: {}, len: {}}}".format(self._name, len(self))
 
     def getName(self):
@@ -160,27 +149,26 @@ class DataSeries(object):
     def getPoints(self):
         return self._points
 
-'''
-Creates a DataSeries from a list of values at uniform time intervals.
-
-Given a `startTime` and `endTime`, this function creates a DataSeries where
-each DataPoint is separated by a uniform time interval, with the first point
-at `startTime` and the last one at `endTime`. For example, if
-`startTime` is 0 and `endTime is 100, and there are 5 values, the resulting
-DataPoints would be at times 0, 25, 50, 75, 100.
-
-Params:
-    seriesName - Name of the resulting DataSeries
-    startTime - Time in milliseconds when the series should start
-    endTime - Time in milliseconds when the series should end
-    values - Numerical values to be made into DataPoints.
-
-Returns:
-    A uniformly distributed DataSeries with DataPoints corresponding to
-    `values`. None if the parameters are invalid, i.e., None or
-    endTime <= startTime.
-'''
 def makeUniformDataSeries(seriesName, startTime, endTime, values):
+    """Creates a DataSeries from a list of values at uniform time intervals.
+
+    Given a `startTime` and `endTime`, this function creates a DataSeries where
+    each DataPoint is separated by a uniform time interval, with the first point
+    at `startTime` and the last one at `endTime`. For example, if
+    `startTime` is 0 and `endTime is 100, and there are 5 values, the resulting
+    DataPoints would be at times 0, 25, 50, 75, 100.
+
+    Params:
+        seriesName - Name of the resulting DataSeries
+        startTime - Time in milliseconds when the series should start
+        endTime - Time in milliseconds when the series should end
+        values - Numerical values to be made into DataPoints.
+
+    Returns:
+        A uniformly distributed DataSeries with DataPoints corresponding to
+        `values`. None if the parameters are invalid, i.e., None or
+        endTime <= startTime.
+    """
     if (seriesName is None) or (startTime is None) or (endTime is None):
         return None
     elif not isinstance(startTime, (int, long)) or not isinstance(endTime, (int, long)):
@@ -201,11 +189,7 @@ def makeUniformDataSeries(seriesName, startTime, endTime, values):
 
     interval = (endTime - startTime) / (valLen - 1)
     pts = []
-    # For compatibility with both Python 2 and 3.
-    try:
-        xrange
-    except NameError:
-        xrange = range  # Python3
+
     for i in xrange(0, valLen - 1):
         t = int(startTime + (i * interval))
         d = DataPoint(values[i], timestamp=t)

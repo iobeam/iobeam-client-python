@@ -266,7 +266,7 @@ In the simplest form, here is how you make a few different queries:
 Then to actually execute the query:
 
     # token is a project token with read access
-    res = iobeam.MakeQuery(token, q)
+    res = iobeam.makeQuery(token, q)
 
 Your result will look something like this:
 

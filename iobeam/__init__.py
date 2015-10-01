@@ -1,7 +1,8 @@
+"""Iobeam client library."""
 from . import iobeam
 
 ClientBuilder = iobeam.ClientBuilder
-MakeQuery = iobeam.MakeQuery
+makeQuery = iobeam.makeQuery
 DataPoint = iobeam.DataPoint
 DataSeries = iobeam.DataSeries
 Timestamp = iobeam.Timestamp

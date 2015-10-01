@@ -1,32 +1,29 @@
+"""Used to communicate with iobeam's Imports API"""
 from iobeam.endpoints import service
 from iobeam.http import request
 
 
-'''
-Communicates with the backend and exposes available Imports API methods.
-'''
 class ImportService(service.EndpointService):
+    """Communicates with the backend and exposes available Imports API methods."""
 
-    ''' Max number of points in a single request '''
-    _BATCH_SIZE = 1000
+    _BATCH_SIZE = 1000  # max # of pts in a single request
 
     def __init__(self, token, requester=None):
         service.EndpointService.__init__(self, token, requester=requester)
 
-    '''
-    Creates the body of a import request.
-
-    Params:
-        projectId - Project ID of the request
-        deviceId - Device ID of the request
-        dataset - The data series of the request, a map with names to lists
-            of data.DataPoints.
-
-    Returns:
-        A dictionary that is the body of an import request.
-    '''
     @staticmethod
     def _makeRequest(projectId, deviceId, dataset):
+        """Creates the body of a import request.
+
+        Params:
+            projectId - Project ID of the request
+            deviceId - Device ID of the request
+            dataset - The data series of the request, a map with names to lists
+                of data.DataPoints.
+
+        Returns:
+            A dictionary that is the body of an import request.
+        """
         sources = []
         req = {
             "project_id": projectId,
@@ -43,26 +40,25 @@ class ImportService(service.EndpointService):
 
         return req
 
-    '''
-    Creates a list of import requests from a data set.
-
-    If the data set is under _BATCH_SIZE, it will be one request. Otherwise
-    it will be split into multiple requests as follows:
-    (1) if a single series has less than ImportService._BATCH_SIZE points,
-        it will be a request.
-    (2) if a single series has more, it will be broken into multiple requests of
-        ImportService._BATCH_SIZE size.
-
-    Params:
-        projectId - Project ID of the requests
-        deviceId - Device ID of the requests
-        dataset - The data set that will be broken into requests.
-
-    Returns:
-        A list of import request bodies.
-    '''
     @staticmethod
     def _makeListOfReqs(projectId, deviceId, dataset):
+        """Creates a list of import requests from a data set.
+
+        If the data set is under _BATCH_SIZE, it will be one request. Otherwise
+        it will be split into multiple requests as follows:
+        (1) if a single series has less than ImportService._BATCH_SIZE points,
+            it will be a request.
+        (2) if a single series has more, it will be broken into multiple requests of
+            ImportService._BATCH_SIZE size.
+
+        Params:
+            projectId - Project ID of the requests
+            deviceId - Device ID of the requests
+            dataset - The data set that will be broken into requests.
+
+        Returns:
+            A list of import request bodies.
+        """
         totalLen = sum(len(dataset[k]) for k in dataset)
 
         reqs = []
@@ -98,27 +94,26 @@ class ImportService(service.EndpointService):
 
         return reqs
 
-    '''
-    Wraps API call `POST /imports`
-
-    Sends data to the iobeam backend to be stored.
-
-    Params:
-        projectId - Project ID the data belongs to
-        deviceId - Device ID the data belongs to
-        dataSeries - Dataset to send, as a dictionary where the keys are
-            the name of the series, and the values are sets containing
-            `iobeam.iobeam.DataPoint`s.
-
-    Returns:
-        True if the data is sent successfully; False and the response otherwise.
-
-    Raises:
-        Exception - If any of projectId, deviceId, or dataSeries is None.
-    '''
     def importData(self, projectId, deviceId, dataSeries):
+        """Wraps API call `POST /imports`
+
+        Sends data to the iobeam backend to be stored.
+
+        Params:
+            projectId - Project ID the data belongs to
+            deviceId - Device ID the data belongs to
+            dataSeries - Dataset to send, as a dictionary where the keys are
+                the name of the series, and the values are sets containing
+                `iobeam.iobeam.DataPoint`s.
+
+        Returns:
+            True if the data is sent successfully; False and the response otherwise.
+
+        Raises:
+            Exception - If any of projectId, deviceId, or dataSeries is None.
+        """
         if not self.token:
-            raise request.UnauthorizedError.noTokenSet();
+            raise request.UnauthorizedError.noTokenSet()
         if projectId is None:
             raise Exception("Project ID cannot be None")
         elif deviceId is None:
