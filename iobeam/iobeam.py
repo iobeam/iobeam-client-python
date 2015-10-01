@@ -252,4 +252,4 @@ class _Client(object):
         service = exports.ExportService(token, requester=requester)
         return service.getData(query)
 
-MakeQuery = _Client.query
+makeQuery = _Client.query
