@@ -1,6 +1,13 @@
 from time import time
 from enum import Enum
 
+# For compatibility with both Python 2 and 3.
+try:
+    long
+except NameError as e:
+    long = int
+
+
 class TimeUnit(Enum):
     MILLISECONDS = "msec"
     MICROSECONDS = "usec"
@@ -23,7 +30,7 @@ class Timestamp(object):
         type - TimeUnit to use for the given value
     '''
     def __init__(self, value, type=TimeUnit.MILLISECONDS):
-        if value is None or not isinstance(value, int):
+        if value is None or not isinstance(value, (int, long)):
             raise ValueError("timestamp value must be an int")
         self._value = value
         self._type = type
@@ -71,12 +78,12 @@ class DataPoint(object):
                      int.
     '''
     def __init__(self, value, timestamp=None):
-        if not (isinstance(value, int) or isinstance(value, float)):
+        if not isinstance(value, (int, long, float)):
             raise ValueError("'value' must be a number.")
         if timestamp is None:
             self._timestamp = Timestamp(int(time() * 1000),
                                         TimeUnit.MILLISECONDS)
-        elif isinstance(timestamp, int):
+        elif isinstance(timestamp, (int, long)):
             self._timestamp = Timestamp(timestamp, TimeUnit.MILLISECONDS)
         elif isinstance(timestamp, Timestamp):
             self._timestamp = timestamp
@@ -176,7 +183,7 @@ Returns:
 def makeUniformDataSeries(seriesName, startTime, endTime, values):
     if (seriesName is None) or (startTime is None) or (endTime is None):
         return None
-    elif not isinstance(startTime, int) or not isinstance(endTime, int):
+    elif not isinstance(startTime, (int, long)) or not isinstance(endTime, (int, long)):
         return None  # TODO: should raise ValueError?
     elif endTime <= startTime:
         return None  # TODO: should raise ValueError?

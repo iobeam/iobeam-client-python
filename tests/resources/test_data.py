@@ -23,6 +23,11 @@ class TestTimestamp(unittest.TestCase):
         self.assertEqual(ts._type, data.TimeUnit.MILLISECONDS)
         self.assertEqual(ts.asMicroseconds(), 5000)
 
+    def test_constructorRealTime(self):
+        ts = data.Timestamp(1443664367594)  # should be a long in 2.7
+        self.assertEqual(ts._type, data.TimeUnit.MILLISECONDS)
+        self.assertEqual(ts.asMicroseconds(), 1443664367594000)
+
     def test_asMicroseconds(self):
         secTs = data.Timestamp(5, data.TimeUnit.SECONDS)
         msecTs = data.Timestamp(5, data.TimeUnit.MILLISECONDS)
@@ -35,12 +40,17 @@ class TestTimestamp(unittest.TestCase):
 
 class TestDataPoint(unittest.TestCase):
 
-    def test_fullConstructorWithInts(self):
+    def test_fullConstructorWithAllTypes(self):
         dp = data.DataPoint(5, timestamp=10)
         self.assertEqual(5, dp._value)
         self.assertEqual(data.Timestamp(10, data.TimeUnit.MILLISECONDS),
                          dp._timestamp)
         self.assertEqual("DataPoint{timestamp: 10000, value: 5}", str(dp))
+
+        dp = data.DataPoint(1443664367594000, timestamp=10)
+        self.assertEqual(1443664367594000, dp._value)
+        self.assertEqual(data.Timestamp(10, data.TimeUnit.MILLISECONDS),
+                         dp._timestamp)
 
         dp = data.DataPoint(5.0, timestamp=11)
         self.assertEqual(5.0, dp._value)
@@ -54,6 +64,12 @@ class TestDataPoint(unittest.TestCase):
         self.assertEqual(data.Timestamp(5, data.TimeUnit.MICROSECONDS),
                          dp._timestamp)
         self.assertEqual("DataPoint{timestamp: 5, value: 5}", str(dp))
+
+        dp = data.DataPoint(5, timestamp=1443664367594000)
+        self.assertEqual(5, dp._value)
+        self.assertEqual(
+            data.Timestamp(1443664367594000, data.TimeUnit.MILLISECONDS),
+            dp._timestamp)
 
     def test_impliedConstructor(self):
         dp = data.DataPoint(50)

@@ -23,6 +23,7 @@ class TestUtilsFuncs(unittest.TestCase):
 
         # Should be valid
         utils.checkValidProjectId(1)
+        utils.checkValidProjectId(14436643675940)
         self.assertTrue(True)
 
     def test_checkValidDeviceId(self):
