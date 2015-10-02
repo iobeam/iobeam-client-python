@@ -8,6 +8,7 @@ class Requester(object):
 
     def __init__(self, baseUrl=_BASE_URL):
         self._baseUrl = baseUrl
+        self._session = requests.Session()
 
     def makeEndpoint(self, endpoint):
         """Create a fully defined URL for an endpoint."""
@@ -15,11 +16,11 @@ class Requester(object):
 
     def get(self, url):
         """Return a base GET request for a given URL."""
-        return Request("GET", url)
+        return Request("GET", url, self._session)
 
     def post(self, url):
         """Return a base POST request for a given URL."""
-        return Request("POST", url)
+        return Request("POST", url, self._session)
 
 
 class UnauthorizedError(Exception):
@@ -42,14 +43,16 @@ class Error(Exception):
 class Request(object):
     """Wrapper for an HTTP request object."""
 
-    def __init__(self, method, url):
+    def __init__(self, method, url, session):
         self.method = method
         self.url = url
         self.headers = {}
         self.header("User-Agent", "iobeam python")
+        self.header("Connection", "keep-alive")
         self.resp = None
         self.body = None
         self.params = {}
+        self._session = session
 
     def header(self, key, value):
         """Add a header to the request (chainable)."""
@@ -74,11 +77,11 @@ class Request(object):
         """Execute an HTTP request using `requests` library."""
         self.resp = None
         if self.method == "GET":
-            self.resp = requests.get(
+            self.resp = self._session.get(
                 self.url, params=self.params, headers=self.headers)
         elif self.method == "POST":
-            self.resp = requests.post(self.url, params=self.params,
-                                      headers=self.headers, json=self.body)
+            self.resp = self._session.post(self.url, params=self.params,
+                                           headers=self.headers, json=self.body)
         else:
             print("unsupported method")
 
@@ -87,6 +90,11 @@ class Request(object):
         if self.resp is None:
             return None
         try:
+            print(self.resp.headers)
+            print("connection" in self.resp.headers)
+            print(self.resp.request.headers)
+            print("connection" in self.resp.request.headers)
+            print()
             return self.resp.json()
         except Exception:
             return None
