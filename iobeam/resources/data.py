@@ -97,11 +97,13 @@ class DataPoint(object):
         return "DataPoint{{timestamp: {}, value: {}}}".format(
             self._timestamp.asMicroseconds(), self._value)
 
+    # pylint:disable=protected-access
     def __eq__(self, other):
         if other is None or not isinstance(other, DataPoint):
             return False
         return (self._value == other._value) and (
             self._timestamp == other._timestamp)
+    # pylint:enable=protected-access
 
     def __hash__(self):
         return self._timestamp.asMicroseconds() + self._value
@@ -144,9 +146,11 @@ class DataSeries(object):
         return "DataSeries{{name: {}, len: {}}}".format(self._name, len(self))
 
     def getName(self):
+        """Return name of the series."""
         return self._name
 
     def getPoints(self):
+        """Return the `DataPoint`s in the series."""
         return self._points
 
 def makeUniformDataSeries(seriesName, startTime, endTime, values):
