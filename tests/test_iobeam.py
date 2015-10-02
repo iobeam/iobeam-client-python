@@ -2,6 +2,10 @@ import unittest
 
 from iobeam import iobeam
 from iobeam.resources import data
+from tests.http import dummy_backend
+from tests.http import request
+
+DummyBackend = dummy_backend.DummyBackend
 
 class TestClientBuilder(unittest.TestCase):
 
@@ -49,8 +53,8 @@ class TestClient(unittest.TestCase):
         self.assertEqual(path, client._path)
         self.assertEqual(0, len(client._dataset))
 
-    def _makeTempClient(self, deviceId=None):
-        return iobeam._Client(None, 1, "dummy", None, deviceId=deviceId)
+    def _makeTempClient(self, backend=None, deviceId=None):
+        return iobeam._Client(None, 1, "dummy", backend, deviceId=deviceId)
 
     def test_constructorBasic(self):
         client = iobeam._Client(None, 1, "dummy", None)
@@ -157,7 +161,6 @@ class TestClient(unittest.TestCase):
         for p in ds.getPoints():
             self.assertTrue(p in client._dataset[series])
 
-
     def test_clearSeries(self):
         client = self._makeTempClient()
         series = "test"
@@ -168,3 +171,41 @@ class TestClient(unittest.TestCase):
         self.assertEqual(1, len(client._dataset[series]))
         client.clearSeries(series)
         self.assertEqual(0, len(client._dataset))
+
+    def test_registerDevice(self):
+        dummy = DummyBackend()
+        backend = request.DummyRequester(dummy)
+        client = self._makeTempClient(backend=backend)
+        self.assertTrue(client._activeDevice is None)
+        client.registerDevice()
+        self.assertTrue(client._activeDevice is not None)
+        self.assertEqual(1, dummy.calls)
+
+    def test_registerDeviceSameAsSet(self):
+        dummy = DummyBackend()
+        backend = request.DummyRequester(dummy)
+        client = self._makeTempClient(backend=backend, deviceId="fake")
+        self.assertEqual("fake", client.getDeviceId())
+        client.registerDevice()
+        self.assertEqual("fake", client.getDeviceId())
+        self.assertEqual(0, dummy.calls)
+        client.registerDevice("fake")
+        self.assertEqual("fake", client.getDeviceId())
+        self.assertEqual(0, dummy.calls)
+
+    def test_send(self):
+        dummy = DummyBackend()
+        backend = request.DummyRequester(dummy)
+        client = self._makeTempClient(backend=backend, deviceId="fake")
+
+        series = "test"
+        vals = [0, 11, 28]
+        dp = iobeam.DataPoint(vals[0])
+        client.addDataPoint(series, dp)
+
+        client.send()
+        self.assertEqual(1, dummy.calls)
+        self.assertTrue(dummy.lastUrl.endswith("/imports"))
+        self.assertEqual(1, dummy.lastJson["project_id"])
+        self.assertEqual("fake", dummy.lastJson["device_id"])
+        self.assertEqual(1, len(dummy.lastJson["sources"]))
