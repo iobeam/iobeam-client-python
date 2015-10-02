@@ -90,11 +90,6 @@ class Request(object):
         if self.resp is None:
             return None
         try:
-            print(self.resp.headers)
-            print("connection" in self.resp.headers)
-            print(self.resp.request.headers)
-            print("connection" in self.resp.request.headers)
-            print()
             return self.resp.json()
         except Exception:
             return None

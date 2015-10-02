@@ -43,7 +43,7 @@ except that it does not be default hit the network.
 class DummyRequest(request.Request):
 
     def __init__(self, method, url):
-        request.Request.__init__(self, method, url)
+        request.Request.__init__(self, method, url, None)
         self.header("User-Agent", "iobeam python dummy")
 
     '''
