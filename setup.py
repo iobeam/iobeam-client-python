@@ -10,6 +10,10 @@ from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
 import sys
+import pypandoc
+
+#converts markdown to reStructured
+long_description = pypandoc.convert('CHANGELOG.md', 'rst', format='markdown')
 
 install_requires = ['requests']
 if "--python-tag" in sys.argv:
@@ -33,6 +37,7 @@ setup(
 
     description='Library for connecting to iobeam, the data analysis \
     platform for the Internet of Things.',
+    long_description=long_description,
 
     # The project's main homepage.
     url='https://github.com/iobeam/iobeam-client-python',
