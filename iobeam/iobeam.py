@@ -278,4 +278,4 @@ class _Client(object):
 # Alias
 def makeQuery(token, qry, backend=None):
     """Perform iobeam query."""
-    _Client.query(token, qry, backend)
+    return _Client.query(token, qry, backend)
