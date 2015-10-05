@@ -12,6 +12,9 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 10/05/15 - v0.5.2
+- Fix missing return for `iobeam.makeQuery()`
+
 ### 10/02/15 - v0.5.1
 
 - Use persistent connections for HTTP to improve performance
