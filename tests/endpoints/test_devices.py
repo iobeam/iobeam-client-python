@@ -99,9 +99,10 @@ class TestDeviceService(unittest.TestCase):
         try:
             ret = service.registerDevice(1, deviceId=regId)
             self.assertTrue(False)
-        except request.Error as e:
+        except devices.DuplicateIdError as e:
+            self.assertTrue(isinstance(e, devices.DuplicateIdError))
             self.assertEqual(2, dummy.calls)
-            self.assertEqual("Received unexpected code: 422", str(e))
+            self.assertEqual("Device ID already registered.", str(e))
 
     def test_registerDeviceDupeName(self):
         registerReturn = (_NONE_DEVICE_ID, _NONE_DEVICE_NAME)
@@ -116,7 +117,8 @@ class TestDeviceService(unittest.TestCase):
         self.assertEqual(regName, body["device_name"])
 
         try:
-            ret = service.registerDevice(1, deviceName=regName)
+            ret = service.registerDevice(1, deviceId="another",
+                                         deviceName=regName)
             self.assertTrue(False)
         except request.Error as e:
             self.assertEqual(2, dummy.calls)

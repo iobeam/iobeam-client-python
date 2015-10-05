@@ -68,9 +68,16 @@ class DummyBackend(request.DummyRequest):
         dname = deviceName or self._register[1]
 
         if did in self._registeredIds or dname in self._registeredNames:
+            errors = []
+            if did in self._registeredIds:
+                errors.append(
+                    {"code": 150, "message": "Device ID already in use"})
+            elif dname in self._registeredNames:
+                errors.append(
+                    {"code": 151, "message": "Device name already in use"})
             return {
                 _STATUS_CODE: 422,
-                "message": "duplicate id or name"
+                "errors": errors
             }
         self._registeredIds.add(did)
         self._registeredNames.add(dname)

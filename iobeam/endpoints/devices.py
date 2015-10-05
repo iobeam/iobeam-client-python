@@ -4,6 +4,13 @@ from iobeam.http import request
 from iobeam.resources import device
 
 
+class DuplicateIdError(request.Error):
+    """Error for trying to register a device id that already exists."""
+
+    def __init__(self):
+        request.Error.__init__(self, "Device ID already registered.")
+
+
 class DeviceService(service.EndpointService):
     """Communicates with the backend and exposes available Devices API methods."""
 
@@ -69,8 +76,10 @@ class DeviceService(service.EndpointService):
                                 deviceName=resp["device_name"])
         elif r.getResponseCode() == 403:
             raise request.UnauthorizedError("Invalid credentials.")
+        elif r.getApiErrorCode() == request.ERROR_CODE_DUPLICATE_DEVICE_ID:
+            raise DuplicateIdError()
         else:
-            raise request.Error("Received unexpected code: {}".format(
-                r.getResponseCode()))
+            raise request.Error(
+                    "Received unexpected code: {}".format(r.getResponseCode()))
 
         return ret

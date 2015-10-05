@@ -1,6 +1,8 @@
 """Classes used when communicating via HTTP to the iobeam backend."""
 import requests
 
+ERROR_CODE_DUPLICATE_DEVICE_ID = 150
+
 class Requester(object):
     """Generates HTTP requests using `requests` library."""
 
@@ -97,3 +99,17 @@ class Request(object):
     def getResponseCode(self):
         """Return HTTP status code for a given request."""
         return self.resp.status_code
+
+    def getApiErrorCode(self):
+        """Return iobeam API error code.
+
+        Returns:
+            The error code or None otherwise.
+        """
+        if self.resp is None:
+            return None
+        try:
+            msg = self.resp.json()
+            return msg["errors"][0]["code"]
+        except Exception:
+            return None
