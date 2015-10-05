@@ -331,7 +331,14 @@ The full list of (chainable) parameters:
 
 ## Running tests
 
-The tests use the Python `unittest` module, so you can invoke the tests with:
+The tests use the Python `unittest` module, along with `mock`. If you are running a Python lower
+than 3.3, you need to install `mock` from PyPI:
+
+    pip install mock
+
+(Versions >= 3.3 already have mock installed.)
+
+You can invoke the tests with:
 
     python -m unittest discover
 

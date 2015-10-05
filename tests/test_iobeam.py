@@ -1,4 +1,9 @@
 import unittest
+import sys
+if sys.version_info > (3, 2):
+    from unittest.mock import patch
+else:
+    from mock import patch
 
 from iobeam import iobeam
 from iobeam.resources import data
@@ -205,3 +210,36 @@ class TestClient(unittest.TestCase):
         self.assertEqual(1, dummy.lastJson["project_id"])
         self.assertEqual("fake", dummy.lastJson["device_id"])
         self.assertEqual(1, len(dummy.lastJson["sources"]))
+
+    def test_queryInvalid(self):
+        def verify(token, qry):
+            try:
+                iobeam._Client.query(token, qry)
+                self.assertTrue(False)
+            except ValueError:
+                pass
+        qry = iobeam.QueryReq(1)
+        bad = [
+            (None, qry),
+            ("dummy", None),
+            ("dummy", "wrong type")
+        ]
+        for (t, q) in bad:
+            verify(t, q)
+
+    def test_query(self):
+        want = {"test": "complete"}
+        qry = iobeam.QueryReq(1)
+        with patch.object(iobeam.exports.ExportService, "getData",
+                          return_value=want) as mm:
+            ret = iobeam._Client.query("dummy", qry)
+            self.assertEqual(want, ret)
+            mm.assert_called_once_with(qry)
+
+
+    def test_makeQuery(self):
+        want = {"test": "complete"}
+        with patch.object(iobeam._Client, "query", return_value=want) as mm:
+            ret = iobeam.makeQuery("dummy", None)
+            self.assertEqual(want, ret)
+            mm.assert_called_once_with("dummy", None, None)
