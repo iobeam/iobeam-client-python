@@ -1,5 +1,13 @@
+from iobeam.utils import utils
 from tests.http import request
 from time import time
+
+# For compatibility with both Python 2 and 3.
+# pylint: disable=redefined-builtin,invalid-name
+if utils.IS_PY3:
+    unicode = str
+# pylint: enable=redefined-builtin,invalid-name
+
 
 AUTH = "Authorization"
 TOKEN = "dummy"
@@ -67,11 +75,6 @@ class DummyBackend(request.DummyRequest):
         self._registeredIds.add(did)
         self._registeredNames.add(dname)
 
-        # For compatibility with both Python 2 and 3.
-        try:
-            unicode
-        except NameError:
-            unicode = str  # Python3
         return {
             _STATUS_CODE: 201,
             "device_id": unicode(did),

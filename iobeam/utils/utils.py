@@ -1,13 +1,15 @@
 """Common utility functions."""
+import sys
+
+IS_PY3 = sys.version_info >= (3, 0)
 
 # For compatibility with both Python 2 and 3.
 # pylint: disable=redefined-builtin,invalid-name
-try:
-    unicode
-except NameError:
+if IS_PY3:
     unicode = str
     long = int
 # pylint: enable=redefined-builtin,invalid-name
+
 
 def checkValidProjectId(projectId):
     """Check that a projectId is valid: a position int.

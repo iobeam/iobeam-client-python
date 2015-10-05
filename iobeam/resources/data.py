@@ -2,12 +2,11 @@
 # pylint: disable=too-few-public-methods
 from time import time
 from enum import Enum
+from iobeam.utils import utils
 
 # For compatibility with both Python 2 and 3.
 # pylint: disable=redefined-builtin,invalid-name
-try:
-    xrange
-except NameError as e:
+if utils.IS_PY3:
     long = int
     xrange = range
 # pylint: enable=redefined-builtin,invalid-name
