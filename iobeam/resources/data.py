@@ -22,8 +22,7 @@ class TimeUnit(Enum):
 class Timestamp(object):
     """Represents a timestamp, using a value and TimeUnit."""
 
-    # TODO change type to unit
-    def __init__(self, value, type=TimeUnit.MILLISECONDS):
+    def __init__(self, value, unit=TimeUnit.MILLISECONDS):
         """Constructor of a Timestamp.
 
         Params:
@@ -31,12 +30,12 @@ class Timestamp(object):
                     Precision is supported by using a different TimeUnit,
                     i.e., 5.5 seconds should be created as 5500 milliseconds
                     or 5500000 microseconds.
-            type - TimeUnit to use for the given value
+            unit - TimeUnit to use for the given value
         """
         if value is None or not isinstance(value, (int, long)):
             raise ValueError("timestamp value must be an int")
         self._value = value
-        self._type = type
+        self._type = unit
 
     def __eq__(self, other):
         if other is None or not isinstance(other, Timestamp):
@@ -195,8 +194,8 @@ def makeUniformDataSeries(seriesName, startTime, endTime, values):
     pts = []
 
     for i in xrange(0, valLen - 1):
-        t = int(startTime + (i * interval))
-        d = DataPoint(values[i], timestamp=t)
+        timestamp = int(startTime + (i * interval))
+        d = DataPoint(values[i], timestamp=timestamp)
         pts.append(d)
     pts.append(DataPoint(values[valLen - 1], timestamp=endTime))
 

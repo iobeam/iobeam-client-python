@@ -18,6 +18,11 @@ class TestTimestamp(unittest.TestCase):
         verify("5")
         verify(5.5)
 
+    def test_explicitConstructor(self):
+        ts = data.Timestamp(5, unit=data.TimeUnit.SECONDS)
+        self.assertEqual(ts._type, data.TimeUnit.SECONDS)
+        self.assertEqual(5000000, ts.asMicroseconds())
+
     def test_impliedConstructor(self):
         ts = data.Timestamp(5)
         self.assertEqual(ts._type, data.TimeUnit.MILLISECONDS)
