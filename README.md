@@ -183,17 +183,17 @@ milliseconds. To specify other precisions, you need to use the
 
     # Timestamps in seconds:
     now = int(time.time())
-    ts = iobeam.Timestamp(now, iobeam.TimeUnit.SECONDS)
+    ts = iobeam.Timestamp(now, unit=iobeam.TimeUnit.SECONDS)
     dp = iobeam.DataPoint(t, timestamp=ts)
 
     # Another way to do milliseconds:
     now = int(time.time() * 1000)
-    ts = iobeam.Timestamp(now, iobeam.TimeUnit.MILLISECONDS)
+    ts = iobeam.Timestamp(now, unit=iobeam.TimeUnit.MILLISECONDS)
     dp = iobeam.DataPoint(t, timestamp=ts)
 
     # Timestamps in microseconds:
     now = int(time.time() * 1000000)
-    ts = iobeam.Timestamp(now, iobeam.TimeUnit.MICROSECONDS)
+    ts = iobeam.Timestamp(now, unit=iobeam.TimeUnit.MICROSECONDS)
     dp = iobeam.DataPoint(t, timestamp=ts)
 
 Currently we support expressing timestamps in seconds, milliseconds,
