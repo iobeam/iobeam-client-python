@@ -133,7 +133,7 @@ class _Client(object):
                                                     requester=backend)
     # pylint: enable=too-many-arguments
 
-    def registerDevice(self, deviceId=None, deviceName=None):
+    def registerDevice(self, deviceId=None, deviceName=None, setOnDupe=False):
         """Registers the device with iobeam.
 
         If a path was provided when the client was constructed, the device ID
@@ -142,18 +142,31 @@ class _Client(object):
         Params:
             deviceId - Desired device ID; otherwise randomly generated
             deviceName - Desired device name; otherwise randomly generated
+            setOnDupe - If duplicate device id, use the id instead of raising an
+                        error; default False (will throw an error if duplicate).
 
         Returns:
             This client object (allows for chaining)
+
+        Raises:
+            devices.DuplicateIdError - If id is a dupliecate and `setOnDupe` is
+                                       False.
         """
         activeSet = self._activeDevice is not None
         didIsNone = deviceId is None
         if activeSet and (didIsNone or self._activeDevice.deviceId == deviceId):
             return self
 
-        d = self._deviceService.registerDevice(self.projectId,
-                                               deviceId=deviceId,
-                                               deviceName=deviceName)
+        try:
+            d = self._deviceService.registerDevice(self.projectId,
+                                                   deviceId=deviceId,
+                                                   deviceName=deviceName)
+        except devices.DuplicateIdError:
+            if setOnDupe:
+                d = device.Device(self.projectId, deviceId,
+                                  deviceName=deviceName)
+            else:
+                raise
         self._setActiveDevice(d)
 
         return self

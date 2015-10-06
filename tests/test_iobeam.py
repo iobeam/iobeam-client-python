@@ -6,6 +6,7 @@ else:
     from mock import patch
 
 from iobeam import iobeam
+from iobeam.endpoints import devices
 from iobeam.resources import data
 from tests.http import dummy_backend
 from tests.http import request
@@ -193,6 +194,23 @@ class TestClient(unittest.TestCase):
         client.registerDevice("fake")
         self.assertEqual("fake", client.getDeviceId())
         self.assertEqual(0, dummy.calls)
+
+    def test_registerDupe(self):
+        dummy = DummyBackend()
+        backend = request.DummyRequester(dummy)
+        client = self._makeTempClient(backend=backend)
+        self.assertTrue(client._activeDevice is None)
+        client.registerDevice(deviceId="dummy")
+        self.assertTrue("dummy", client.getDeviceId())
+        self.assertEqual(1, dummy.calls)
+
+        backend = request.DummyRequester(dummy)
+        client = self._makeTempClient(backend=backend)
+        try:
+            client.registerDevice(deviceId="dummy")
+            self.assertTrue(False)
+        except devices.DuplicateIdError:
+            self.assertEqual(2, dummy.calls)
 
     def test_send(self):
         dummy = DummyBackend()

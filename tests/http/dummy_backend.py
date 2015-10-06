@@ -63,6 +63,7 @@ class DummyBackend(request.DummyRequest):
             "server_timestamp": self._timestamp
         }
 
+    # TODO - Change so subsequent calls without providing deviceId don't fail
     def registerDevice(self, deviceId=None, deviceName=None):
         did = deviceId or self._register[0]
         dname = deviceName or self._register[1]
