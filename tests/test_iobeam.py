@@ -38,6 +38,13 @@ class TestClientBuilder(unittest.TestCase):
         for t in bads:
             verify(1, t)
 
+    def test_chainable(self):
+        builder = iobeam.ClientBuilder(1, "dummy")
+        self.assertEqual(builder, builder.saveToDisk())
+        self.assertEqual(builder, builder.setDeviceId("dummy"))
+        self.assertEqual(builder, builder.registerOrSetId("dummy"))
+        self.assertEqual(builder, builder.registerDevice("dummy"))
+        self.assertEqual(builder, builder.setBackend("test.com"))
 
     def test_buildBasic(self):
         builder = iobeam.ClientBuilder(1, "dummy")
@@ -49,6 +56,22 @@ class TestClientBuilder(unittest.TestCase):
         self.assertEqual("dummy", client.projectToken)
         self.assertTrue(client.getDeviceId() is None)
         self.assertFalse(client.isRegistered())
+
+    def test_registerOrSet(self):
+        builder = iobeam.ClientBuilder(1, "dummy").registerOrSetId("test")
+        dummy = DummyBackend()
+        backend = request.DummyRequester(dummy)
+        builder._backend = backend
+        client = builder.build()
+        self.assertEqual("test", client.getDeviceId())
+        self.assertEqual(1, dummy.calls)
+
+        builder = iobeam.ClientBuilder(1, "dummy").registerOrSetId("test")
+        builder._backend = backend
+        client2 = builder.build()
+        self.assertEqual("test", client2.getDeviceId())
+        self.assertEqual(2, dummy.calls)
+
 
 
 class TestClient(unittest.TestCase):
@@ -211,6 +234,8 @@ class TestClient(unittest.TestCase):
             self.assertTrue(False)
         except devices.DuplicateIdError:
             self.assertEqual(2, dummy.calls)
+        client.registerDevice(deviceId="dummy", setOnDupe=True)
+        self.assertTrue("dummy", client.getDeviceId())
 
     def test_send(self):
         dummy = DummyBackend()
