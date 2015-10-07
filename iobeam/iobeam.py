@@ -50,6 +50,19 @@ class ClientBuilder(object):
         self._deviceId = deviceId
         return self
 
+    def registerOrSetId(self, deviceId):
+        """Client object should register itself, or set the id if it exists.
+
+        Params:
+            deviceId - Desired device id to register or set if it exists
+
+        Returns:
+            This Builder object, for chaining.
+        """
+        self._regArgs = (deviceId, None, True)
+        return self
+
+
     def registerDevice(self, deviceId=None, deviceName=None):
         """Client object should register itself (chainable).
 
@@ -60,7 +73,7 @@ class ClientBuilder(object):
         Returns:
             This Builder object, for chaining.
         """
-        self._regArgs = (deviceId, deviceName)
+        self._regArgs = (deviceId, deviceName, False)
         return self
 
     def setBackend(self, baseUrl):
@@ -80,8 +93,9 @@ class ClientBuilder(object):
         client = _Client(self._diskPath, self._projectId, self._projectToken,
                          self._backend, deviceId=self._deviceId)
         if self._regArgs is not None:
-            did, dname = self._regArgs
-            client.registerDevice(deviceId=did, deviceName=dname)
+            did, dname, setOnDupe = self._regArgs
+            client.registerDevice(deviceId=did, deviceName=dname,
+                                  setOnDupe=setOnDupe)
 
         return client
 
@@ -133,7 +147,7 @@ class _Client(object):
                                                     requester=backend)
     # pylint: enable=too-many-arguments
 
-    def registerDevice(self, deviceId=None, deviceName=None):
+    def registerDevice(self, deviceId=None, deviceName=None, setOnDupe=False):
         """Registers the device with iobeam.
 
         If a path was provided when the client was constructed, the device ID
@@ -142,18 +156,31 @@ class _Client(object):
         Params:
             deviceId - Desired device ID; otherwise randomly generated
             deviceName - Desired device name; otherwise randomly generated
+            setOnDupe - If duplicate device id, use the id instead of raising an
+                        error; default False (will throw an error if duplicate).
 
         Returns:
             This client object (allows for chaining)
+
+        Raises:
+            devices.DuplicateIdError - If id is a dupliecate and `setOnDupe` is
+                                       False.
         """
         activeSet = self._activeDevice is not None
         didIsNone = deviceId is None
         if activeSet and (didIsNone or self._activeDevice.deviceId == deviceId):
             return self
 
-        d = self._deviceService.registerDevice(self.projectId,
-                                               deviceId=deviceId,
-                                               deviceName=deviceName)
+        try:
+            d = self._deviceService.registerDevice(self.projectId,
+                                                   deviceId=deviceId,
+                                                   deviceName=deviceName)
+        except devices.DuplicateIdError:
+            if setOnDupe:
+                d = device.Device(self.projectId, deviceId,
+                                  deviceName=deviceName)
+            else:
+                raise
         self._setActiveDevice(d)
 
         return self
