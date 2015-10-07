@@ -18,30 +18,33 @@ Before you can start sending data to the iobeam backend, you'll need a
 [command-line interface (CLI) tool](https://github.com/iobeam/iobeam) or by
 accessing your project settings from [our web app](https://app.iobeam.com).
 
+You need python **2.7.9+** or **3.4.3+** (earlier versions of python3 may
+work, but it has not been tested).
+
+
+## Installation
+
+The easiest way to install is to use `pip`:
+
+    pip install iobeam
+
+#### Installing from source
+
 You will need the [requests](http://www.python-requests.org/en/latest/) library
 installed. You can get it via pip:
 
     pip install requests
-
-Further, you need python **2.7.9+** or **3.4.3+** (earlier versions of python3 may
-work, but it has not been tested).
 
 If you are using Python2, or a version of Python3 earlier than 3.5, you will need
 the `enum34` library as well:
 
     pip install enum34
 
-## Installation
-
-To install with pip:
-
-    pip install iobeam
-
-To install from source:
+Then, to install from source:
 
     git clone https://github.com/iobeam/iobeam-client-python.git
 
-Then make sure that the `iobeam-client-python` folder is in your `PYTHONPATH`.
+Then make sure that the `iobeam` folder is in your `PYTHONPATH`.
 
 
 ## Overview
