@@ -12,6 +12,8 @@ from codecs import open
 import sys
 import pypandoc
 
+VERSION = '0.6.0'
+
 #converts markdown to reStructured
 long_description = pypandoc.convert('CHANGELOG.md', 'rst', format='markdown')
 
@@ -33,7 +35,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.5.2',
+    version=VERSION,
 
     description='Library for connecting to iobeam, the data analysis \
     platform for the Internet of Things.',

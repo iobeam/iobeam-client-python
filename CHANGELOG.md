@@ -12,6 +12,13 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 10/13/15 - v0.6.0
+- `Timestamp`: changed `type` param name to `unit` in constructor
+- utils: Adds a check for whether this is python2 or 3
+- New Error for duplicate ids
+- New `registerOrSetId()` added to `iobeam.ClientBuilder` to allow you to register a name, or
+it already exists, set the client to use that id. 
+
 ### 10/05/15 - v0.5.2
 - Fix missing return for `iobeam.makeQuery()`
 
