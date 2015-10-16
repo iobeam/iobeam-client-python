@@ -42,6 +42,22 @@ class Timestamp(object):
 
         return self.asMicroseconds() == other.asMicroseconds()
 
+    def asMilliseconds(self):
+        """This timestamp value represented in milliseconds.
+
+        Returns:
+            Timestamp coverted to an integral number of milliseconds.
+            For timestamps with TimeUnit.MICROSECONDS, this is the value / 1000;
+            for TimeUnit.MILLISECONDS this is just the value; and for
+            TimeUnit.SECONDS, this is value * 1000.
+        """
+        if self._type == TimeUnit.MICROSECONDS:
+            return int(self._value // 1000)
+        elif self._type == TimeUnit.MILLISECONDS:
+            return self._value
+        elif self._type == TimeUnit.SECONDS:
+            return (self._value * 1000)
+
     def asMicroseconds(self):
         """This timestamp value represented in microseconds.
 

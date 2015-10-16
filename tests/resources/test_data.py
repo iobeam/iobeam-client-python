@@ -33,6 +33,17 @@ class TestTimestamp(unittest.TestCase):
         self.assertEqual(ts._type, data.TimeUnit.MILLISECONDS)
         self.assertEqual(ts.asMicroseconds(), 1443664367594000)
 
+    def test_asMilliseconds(self):
+        secTs = data.Timestamp(5500, data.TimeUnit.SECONDS)
+        msecTs = data.Timestamp(5500, data.TimeUnit.MILLISECONDS)
+        usecTs = data.Timestamp(5500, data.TimeUnit.MICROSECONDS)
+        usecTs2 = data.Timestamp(6000, data.TimeUnit.MICROSECONDS)
+
+        self.assertEqual(5500000, secTs.asMilliseconds())
+        self.assertEqual(5500, msecTs.asMilliseconds())
+        self.assertEqual(5, usecTs.asMilliseconds())
+        self.assertEqual(6, usecTs2.asMilliseconds())
+
     def test_asMicroseconds(self):
         secTs = data.Timestamp(5, data.TimeUnit.SECONDS)
         msecTs = data.Timestamp(5, data.TimeUnit.MILLISECONDS)
