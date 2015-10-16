@@ -92,14 +92,16 @@ class Query(object):
         """Sets the from time limit for results."""
         msg = "time must be an int ({} from epoch)".format(self._timeUnit.value)
         if Query._validIntOrRaise(time, msg):
-            self._params["from"] = time
+            ts = data.Timestamp(time, unit=self._timeUnit)
+            self._params["from"] = ts.asMilliseconds()
         return self
 
     def toTime(self, time):
         """Sets the to time limit for results."""
         msg = "time must be an int ({} from epoch)".format(self._timeUnit.value)
         if Query._validIntOrRaise(time, msg):
-            self._params["to"] = time
+            ts = data.Timestamp(time, unit=self._timeUnit)
+            self._params["to"] = ts.asMilliseconds()
         return self
 
     def inTimeRange(self, start, end):

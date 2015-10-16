@@ -6,6 +6,7 @@ _PROJECT_ID = 1
 _DEVICE_ID = "py_test_id"
 _SERIES = "temp"
 
+TimeUnit = query.TimeUnit
 
 class TestQuery(unittest.TestCase):
 
@@ -113,6 +114,17 @@ class TestQuery(unittest.TestCase):
         # Failure case: non-int
         self._checkInvalid(q.fromTime, "junk")
 
+    def test_fromTimeOtherUnits(self):
+        q = query.Query(_PROJECT_ID, timeUnit=TimeUnit.MICROSECONDS)
+        ret = q.fromTime(5500)
+        self.assertEqual(5, q.getParams()["from"])
+        self.assertEqual(q, ret)
+
+        q = query.Query(_PROJECT_ID, timeUnit=TimeUnit.SECONDS)
+        ret = q.fromTime(5)
+        self.assertEqual(5000, q.getParams()["from"])
+        self.assertEqual(q, ret)
+
     def test_toTime(self):
         q = query.Query(_PROJECT_ID)
         self.paramNoneTest(q, q.toTime)
@@ -123,6 +135,17 @@ class TestQuery(unittest.TestCase):
 
         # Failure case: non-int
         self._checkInvalid(q.toTime, "junk")
+
+    def test_toTimeOtherUnits(self):
+        q = query.Query(_PROJECT_ID, timeUnit=TimeUnit.MICROSECONDS)
+        ret = q.toTime(5500)
+        self.assertEqual(5, q.getParams()["to"])
+        self.assertEqual(q, ret)
+
+        q = query.Query(_PROJECT_ID, timeUnit=TimeUnit.SECONDS)
+        ret = q.toTime(5)
+        self.assertEqual(5000, q.getParams()["to"])
+        self.assertEqual(q, ret)
 
     def test_inTimeRange(self):
         q = query.Query(_PROJECT_ID)
