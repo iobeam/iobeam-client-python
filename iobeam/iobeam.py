@@ -269,6 +269,8 @@ class _Client(object):
         success, extra = self._importService.importData(pid, did, dataset)
         if not success:
             raise Exception("Send failed, server sent: {}".format(extra))
+        else:
+            self._dataset = {}
 
     @staticmethod
     def query(token, qry, backend=None):

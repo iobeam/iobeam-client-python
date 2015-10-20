@@ -248,6 +248,7 @@ class TestClient(unittest.TestCase):
         client.addDataPoint(series, dp)
 
         client.send()
+        self.assertEqual(0, len(client._dataset))
         self.assertEqual(1, dummy.calls)
         self.assertTrue(dummy.lastUrl.endswith("/imports"))
         self.assertEqual(1, dummy.lastJson["project_id"])
