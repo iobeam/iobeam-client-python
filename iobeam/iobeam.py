@@ -59,6 +59,7 @@ class ClientBuilder(object):
         Returns:
             This Builder object, for chaining.
         """
+        utils.checkValidDeviceId(deviceId)
         self._regArgs = (deviceId, None, True)
         return self
 
@@ -73,6 +74,8 @@ class ClientBuilder(object):
         Returns:
             This Builder object, for chaining.
         """
+        if deviceId is not None:
+            utils.checkValidDeviceId(deviceId)
         self._regArgs = (deviceId, deviceName, False)
         return self
 
@@ -170,6 +173,9 @@ class _Client(object):
         didIsNone = deviceId is None
         if activeSet and (didIsNone or self._activeDevice.deviceId == deviceId):
             return self
+
+        if deviceId is not None:
+            utils.checkValidDeviceId(deviceId)
 
         try:
             d = self._deviceService.registerDevice(self.projectId,

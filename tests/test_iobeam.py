@@ -72,6 +72,32 @@ class TestClientBuilder(unittest.TestCase):
         self.assertEqual("test", client2.getDeviceId())
         self.assertEqual(2, dummy.calls)
 
+    def test_registerOrSetInvalid(self):
+        def check(deviceId):
+            try:
+                builder = iobeam.ClientBuilder(1, "dummy").registerOrSetId(deviceId)
+                self.assertTrue(False)
+            except ValueError:
+                pass
+
+        badIds = [None, 5, ""]
+        for i in badIds:
+            check(i)
+
+    def test_registerInvalid(self):
+        def check(deviceId):
+            try:
+                builder = iobeam.ClientBuilder(1, "dummy")
+                builder.registerDevice(deviceId=deviceId)
+                self.assertTrue(False)
+            except ValueError:
+                pass
+
+        # Note: None not included because that signals server to randomly generate
+        # an id, rather than being an error.
+        badIds = [5, ""]
+        for i in badIds:
+            check(i)
 
 
 class TestClient(unittest.TestCase):
@@ -236,6 +262,24 @@ class TestClient(unittest.TestCase):
             self.assertEqual(2, dummy.calls)
         client.registerDevice(deviceId="dummy", setOnDupe=True)
         self.assertTrue("dummy", client.getDeviceId())
+
+    def test_registerBadIds(self):
+        def check(client, deviceId):
+            try:
+                self.assertTrue(client._activeDevice is None)
+                client.registerDevice(deviceId=deviceId)
+                self.assertTrue(False)
+            except ValueError:
+                self.assertTrue(client._activeDevice is None)
+                self.assertEqual(0, dummy.calls)
+
+        dummy = DummyBackend()
+        backend = request.DummyRequester(dummy)
+        client = self._makeTempClient(backend=backend)
+        badIds = [5, ""]
+        for i in badIds:
+            check(client, i)
+
 
     def test_send(self):
         dummy = DummyBackend()
