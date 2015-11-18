@@ -133,6 +133,80 @@ class DataPoint(object):
             "value": self._value
         }
 
+
+class DataBatch(object):
+    """A collection of DataPoint series with rows batched by time."""
+
+    def __init__(self, fields):
+        """Construct a new DataBatch object with given fields.
+
+        Params:
+            fields - Column or series names for data in this batch.
+
+        Raises:
+            ValueError - If `fields` is None, empty, or not a list.
+        """
+        if fields is None or len(fields) == 0:
+            raise ValueError("fields cannot be None or empty")
+        if not isinstance(fields, list):
+            raise ValueError("fields must be a list of strings")
+        self._fields = list(fields)  # defensive copy
+        self._rows = []
+
+    def add(self, timestamp, dataDict):
+        """Add row of data at a timestamp to batch.
+
+        Params:
+            timestamp - Timestamp for all points to share
+            dataDict - Data values keyed by which series they belong to.
+
+        Raises:
+            ValueError - For multiple cases:
+                (a) timestamp is neither an int or a Timestamp type
+                (b) dataDict is empty or None
+                (b) dataDict contains keys not in this batch
+        """
+        ts = None
+        # validate timestamp
+        if isinstance(timestamp, (int, long)):
+            ts = Timestamp(timestamp)
+        elif isinstance(timestamp, Timestamp):
+            ts = timestamp
+        else:
+            raise ValueError("timestamp must be an int or Timestamp type")
+
+        # validate data
+        if dataDict is None or len(dataDict) == 0:
+            raise ValueError("dataDict cannot be None or empty")
+        for k in dataDict:
+            if k not in self._fields:
+                raise ValueError("dataDict can only contain keys in this batch's fields")
+
+        # everything ok, make row
+        row = {"time": ts.asMicroseconds()}
+        for f in self._fields:
+            if f in dataDict:
+                row[f] = dataDict[f]
+            else:
+                row[f] = None
+        self._rows.append(row)
+
+    def fields(self):
+        """Return a copy of the fields in this batch."""
+        return list(self._fields)
+
+    def rows(self):
+        """Return a copy of the rows in this batch."""
+        ret = []
+        for r in self._rows:
+            ret.append(r.copy())
+        return ret
+
+    def __len__(self):
+        """Return the size of this batch in terms of data points."""
+        return len(self._rows) * len(self._fields)
+
+
 class DataSeries(object):
     """A collection of DataPoints for a given named series."""
 

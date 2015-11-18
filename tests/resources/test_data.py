@@ -122,6 +122,77 @@ class TestDataPoint(unittest.TestCase):
         self.assertEqual(5, ret["value"])
 
 
+class TestDataBatch(unittest.TestCase):
+
+    def test_constructor(self):
+        fields = ["a", "boo", "cola"]
+        db = data.DataBatch(fields)
+        self.assertEqual(3, len(db.fields()))
+        for i in range(0, len(fields)):
+            self.assertEqual(fields[i], db.fields()[i])
+        # check defensive constructor
+        fields.append("done")
+        self.assertEqual(3, len(db.fields()))
+        # check defensive getter
+        db.fields().append("done")
+        self.assertEqual(3, len(db.fields()))
+
+    def test_constructorBad(self):
+        def verify(fields):
+            try:
+                _ = data.DataBatch(fields)
+                self.assertTrue(False)
+            except ValueError:
+                pass
+
+        cases = [None, []]
+        for c in cases:
+            verify(c)
+
+    def test_add(self):
+        fields = ["a", "b", "c"]
+        db = data.DataBatch(fields)
+        self.assertEqual(0, len(db.rows()))
+        self.assertEqual(0, len(db))
+        db.add(0, {"a": 1, "b": 2, "c": 3})
+        self.assertEqual(1, len(db.rows()))
+        self.assertEqual(3, len(db))
+        r1 = db.rows()[0]
+        self.assertEqual(0, r1["time"])
+        self.assertEqual(1, r1["a"])
+        self.assertEqual(2, r1["b"])
+        self.assertEqual(3, r1["c"])
+
+        db.add(1, {"a": 4, "c": 6})
+        self.assertEqual(2, len(db.rows()))
+        self.assertEqual(6, len(db))
+        r2 = db.rows()[1]
+        self.assertEqual(1000, r2["time"])
+        self.assertEqual(4, r2["a"])
+        self.assertEqual(None, r2["b"])
+        self.assertEqual(6, r2["c"])
+
+    def test_addBad(self):
+        fields = ["a", "b", "c"]
+        db = data.DataBatch(fields)
+        def verify(time, data):
+            try:
+                db.add(time, data)
+                self.assertTrue(False)
+            except ValueError:
+                pass
+
+        cases = [
+            ("0", {"a": 1}),
+            (0, None),
+            (0, {}),
+            (0, {"a": 1, "d": 0})
+        ]
+
+        for (t, d) in cases:
+            verify(t, d)
+
+
 class TestDataSeries(unittest.TestCase):
 
     def test_constructorNonePoints(self):
