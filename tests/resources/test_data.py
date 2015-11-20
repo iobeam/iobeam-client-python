@@ -192,6 +192,22 @@ class TestDataBatch(unittest.TestCase):
         for (t, d) in cases:
             verify(t, d)
 
+    def test_split(self):
+        fields = ["a", "b", "c"]
+        db = data.DataBatch(fields)
+        for i in range(0, 10):
+            db.add(i, {"a": i, "b": i, "c": i})
+        batches = db.split(5)
+        self.assertEqual(2, len(batches))
+        self.assertEqual(5, len(batches[0].rows()))
+        self.assertEqual(5, len(batches[1].rows()))
+
+        batches = db.split(4)
+        self.assertEqual(3, len(batches))
+        self.assertEqual(4, len(batches[0].rows()))
+        self.assertEqual(4, len(batches[1].rows()))
+        self.assertEqual(2, len(batches[2].rows()))
+
 
 class TestDataSeries(unittest.TestCase):
 

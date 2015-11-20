@@ -202,6 +202,23 @@ class DataBatch(object):
             ret.append(r.copy())
         return ret
 
+    def split(self, chunkSize):
+        """Split a batch into multiple batches with `chunkSize` rows.
+
+        Params:
+            chunkSize - Max number of rows to include in a split
+
+        Returns:
+            List of DataBatchs containing at most chunkSize rows from this batch.
+        """
+        ret = []
+        for i in range(0, len(self._rows), chunkSize):
+            temp = DataBatch(self._fields)
+            temp._rows = self._rows[i:i+chunkSize]
+            ret.append(temp)
+
+        return ret
+
     def __len__(self):
         """Return the size of this batch in terms of data points."""
         return len(self._rows) * len(self._fields)
