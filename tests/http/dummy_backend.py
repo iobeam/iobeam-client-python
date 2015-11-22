@@ -55,7 +55,9 @@ class DummyBackend(request.DummyRequest):
             dname = body["device_name"] if "device_name" in body else None
             return Resp(self.registerDevice(deviceId=did, deviceName=dname))
         elif url.endswith("/imports"):
-            return Resp(self.importData(self.body))
+            fmt = params.get("fmt") if params is not None else None
+            batch = fmt is "table"
+            return Resp(self.importData(self.body, batch))
         elif "/exports" in url:
             return Resp(self.getData())
         else:
@@ -99,11 +101,13 @@ class DummyBackend(request.DummyRequest):
             "device_name": unicode(dname)
         }
 
-    def importData(self, body):
+    def importData(self, body, isBatch):
         if ("project_id" not in body or
             "device_id" not in body or
             "sources" not in body):
             return {_STATUS_CODE: 400}
+        elif isBatch:
+            return {_STATUS_CODE: 200}
         else:
             for p in body["sources"]:
                 if "name" not in p or "data" not in p:

@@ -1,6 +1,7 @@
 """Used to communicate with iobeam's Imports API"""
 from iobeam.endpoints import service
 from iobeam.http import request
+from iobeam.utils import utils
 
 
 class ImportService(service.EndpointService):
@@ -37,6 +38,38 @@ class ImportService(service.EndpointService):
             for d in dataset[series]:
                 pts.append(d.toDict())
             sources.append(obj)
+
+        return req
+
+    @staticmethod
+    def _makeBatchRequest(projectId, deviceId, dataBatch):
+        """Creates the body of a batch import request.
+
+        Params:
+            projectId - Project ID of the request
+            deviceId - Device ID of the request
+            dataBatch - The DataBatch that makes the body of the request.
+
+        Returns:
+            A dictionary that is the body of an import request.
+        """
+        sources = {}
+        req = {
+            "project_id": projectId,
+            "device_id": deviceId,
+            "sources": sources,
+            "timefmt": "usec"
+        }
+
+        sources["fields"] = ["time"]
+        for f in dataBatch.fields():
+            sources["fields"].append(f)
+        sources["data"] = []
+        for r in dataBatch.rows():
+            row = []
+            for f in sources["fields"]:
+                row.append(r[f])
+            sources["data"].append(row)
 
         return req
 
@@ -94,6 +127,40 @@ class ImportService(service.EndpointService):
 
         return reqs
 
+    @staticmethod
+    def _makeListOfBatchReqs(projectId, deviceId, dataBatch):
+        """Creates a list of import requests from a DataBatch.
+
+        If the data set is under _BATCH_SIZE, it will be one request. Otherwise
+        it will be split into multiple requests of at most _BACH_SIZE data
+        points.
+
+        Params:
+            projectId - Project ID of the requests
+            deviceId - Device ID of the requests
+            dataset - The data batch to create requests from
+
+        Returns:
+            A list of batch import request bodies.
+        """
+        totalLen = len(dataBatch)
+
+        reqs = []
+        # No series, no requests
+        if totalLen == 0:
+            pass
+        # Everything can fit in one request
+        elif totalLen <= ImportService._BATCH_SIZE:
+            reqs.append(ImportService._makeBatchRequest(projectId, deviceId, dataBatch))
+        # Need to create multiple requests
+        else:
+            maxRowsPerBatch = ImportService._BATCH_SIZE // len(dataBatch.fields())
+            batches = dataBatch.split(maxRowsPerBatch)
+            for b in batches:
+                reqs.append(ImportService._makeBatchRequest(projectId, deviceId, b))
+
+        return reqs
+
     def importData(self, projectId, deviceId, dataSeries):
         """Wraps API call `POST /imports`
 
@@ -103,11 +170,13 @@ class ImportService(service.EndpointService):
             projectId - Project ID the data belongs to
             deviceId - Device ID the data belongs to
             dataSeries - Dataset to send, as a dictionary where the keys are
-                the name of the series, and the values are sets containing
-                `iobeam.iobeam.DataPoint`s.
+            the name of the series, and the values are sets containing
+            `iobeam.iobeam.DataPoint`s.
 
         Returns:
-            True if the data is sent successfully; False and the response otherwise.
+            A tuple where the first item is the success of all of the requests (True if
+            all succeed, False otherwise); the second item is any error message or None
+            if successful.
 
         Raises:
             Exception - If any of projectId, deviceId, or dataSeries is None.
@@ -121,7 +190,7 @@ class ImportService(service.EndpointService):
         elif dataSeries is None:
             raise Exception("Dataset cannot be None")
         elif len(dataSeries) == 0:
-            return True
+            return (True, None)
         endpoint = self.makeEndpoint("imports")
 
         reqs = ImportService._makeListOfReqs(projectId, deviceId, dataSeries)
@@ -130,6 +199,45 @@ class ImportService(service.EndpointService):
         for req in reqs:
             r = self.requester().post(endpoint).token(self.token)
             r.setBody(req)
+            r.execute()
+            success = success and (r.getResponseCode() == 200)
+            if r.getResponseCode() != 200:
+                extra = r.getResponse()
+
+        return (success, extra)
+
+    def importBatch(self, projectId, deviceId, dataBatch):
+        """Wraps API call `POST /imports?fmt=table`
+
+        Sends data to the iobeam backend to be stored.
+
+        Params:
+            projectId - Project ID the data belongs to
+            deviceId - Device ID the data belongs to
+            dataBatch - A `DataBatch` object containing the the data to be imported
+
+        Returns:
+            A tuple where the first item is the success of all of the requests (True if
+            all succeed, False otherwise); the second item is any error message or None
+            if successful.
+
+        Raises:
+            ValueError - If validity checks fail for the token, project id, or device id.
+        """
+        utils.checkValidProjectId(projectId)
+        utils.checkValidProjectToken(self.token)
+        utils.checkValidDeviceId(deviceId)
+        if dataBatch is None or len(dataBatch) == 0:
+            return (True, None)
+        endpoint = self.makeEndpoint("imports")
+
+        reqs = ImportService._makeListOfBatchReqs(projectId, deviceId, dataBatch)
+        success = True
+        extra = None
+        for req in reqs:
+            r = self.requester().post(endpoint).token(self.token) \
+                .setParam("fmt", "table") \
+                .setBody(req)
             r.execute()
             success = success and (r.getResponseCode() == 200)
             if r.getResponseCode() != 200:
