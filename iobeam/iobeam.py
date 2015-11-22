@@ -131,6 +131,7 @@ class _Client(object):
         self.projectToken = projectToken
         self._path = path
         self._dataset = {}
+        self._batches = []
 
         self._activeDevice = None
         if deviceId is not None:
@@ -263,6 +264,7 @@ class _Client(object):
             dataseries - The DataSeries to add to the data store.
         """
         if dataseries is None or not isinstance(dataseries, data.DataSeries):
+            # TODO - log warning
             return
         elif len(dataseries) == 0:
             return
@@ -278,6 +280,35 @@ class _Client(object):
         """Removes any points associated with `seriesName`."""
         self._dataset.pop(seriesName, None)
 
+    def addDataBatch(self, batch):
+        """Add a DataBatch to the data store.
+
+        Params:
+            batch - The DataBatch to add to the data store.
+        """
+        if batch is None:
+            # TODO - log warning
+            return
+        elif not isinstance(batch, data.DataBatch):
+            raise ValueError("batch must be a DataBatch")
+        elif len(batch) == 0:
+            return
+
+        self._batches.append(batch)
+
+    def _convertDataSetToBatches(self):
+        dataset = self._dataset
+        for name in dataset:
+            batch = data.DataBatch([name])
+            for point in dataset[name]:
+                asDict = point.toDict()
+                ts = data.Timestamp(asDict["time"], unit=TimeUnit.MICROSECONDS)
+                row = {}
+                row[name] = asDict["value"]
+                batch.add(ts, row)
+            self._batches.append(batch)
+        self._dataset = {}
+
     def send(self):
         """Sends stored data to the iobeam backend.
 
@@ -287,12 +318,15 @@ class _Client(object):
         self._checkToken()
         pid = self.projectId
         did = self._activeDevice.deviceId
-        dataset = self._dataset
-        success, extra = self._importService.importData(pid, did, dataset)
-        if not success:
-            raise Exception("Send failed, server sent: {}".format(extra))
-        else:
-            self._dataset = {}
+        self._convertDataSetToBatches()
+
+        i = 0
+        for b in list(self._batches):
+            success, extra = self._importService.importBatch(pid, did, b)
+            if not success:
+                raise Exception("send failed. server sent: {}".format(extra))
+            else:
+                self._batches.remove(b)
 
     @staticmethod
     def query(token, qry, backend=None):

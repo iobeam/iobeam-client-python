@@ -294,6 +294,29 @@ class TestClient(unittest.TestCase):
         for i in badIds:
             check(client, i)
 
+    def test_convertDataSetToBatches(self):
+        dummy = DummyBackend()
+        backend = request.DummyRequester(dummy)
+        client = self._makeTempClient(backend=backend, deviceId="fake")
+
+        series = "test"
+        vals = [0, 11, 28]
+        ts = data.Timestamp(1)
+        dp = iobeam.DataPoint(vals[0], timestamp=ts)
+        client.addDataPoint(series, dp)
+        ts = data.Timestamp(2)
+        dp = iobeam.DataPoint(vals[1], timestamp=ts)
+        client.addDataPoint(series, dp)
+        self.assertEqual(1, len(client._dataset))
+        self.assertEqual(0, len(client._batches))
+
+        client._convertDataSetToBatches()
+        self.assertEqual(0, len(client._dataset))
+        self.assertEqual(1, len(client._batches))
+        for b in client._batches:
+            self.assertEqual(1, len(b.fields()))
+            self.assertEqual(series, b.fields()[0])
+            self.assertEqual(2, len(b))
 
     def test_send(self):
         dummy = DummyBackend()
@@ -312,7 +335,8 @@ class TestClient(unittest.TestCase):
         self.assertTrue(dummy.lastUrl.endswith("/imports"))
         self.assertEqual(1, dummy.lastJson["project_id"])
         self.assertEqual("fake", dummy.lastJson["device_id"])
-        self.assertEqual(1, len(dummy.lastJson["sources"]))
+        # 2: 'fields' and 'data', batch format
+        self.assertEqual(2, len(dummy.lastJson["sources"]))
 
     def test_queryInvalid(self):
         def verify(token, qry):
