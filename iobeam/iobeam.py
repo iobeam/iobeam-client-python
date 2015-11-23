@@ -11,6 +11,7 @@ from .utils import utils
 import os.path
 
 #  Aliases for resource types for convenience outside the package.
+DataBatch = data.DataBatch
 DataPoint = data.DataPoint
 DataSeries = data.DataSeries
 Timestamp = data.Timestamp

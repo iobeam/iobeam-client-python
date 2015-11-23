@@ -153,33 +153,44 @@ and have no need to save it.
 
 ### Tracking Time-series Data
 
-For each time-series data point, create a `iobeam.DataPoint` object:
+For a more in-depth discussion about adding data, please see [our guide on
+adding data](docs/DataGuide.md).
 
+To track time-series data, you need to decide how to break down your data
+streams into "batches", a collection of data streams grouped together. You
+create a `iobeam.DataBatch` with a list of stream names that the batch contains.
+So if you're tracking just temperature in a batch:
+
+    batch = iobeam.DataBatch(["temperature"])
+
+Then for every data point, you'll want to add it to the batch:
+
+    now = ...  # e.g., now = int(time.time() * 1000) (import time first)
     t = getTemperature()
-    d = iobeam.DataPoint(t)
+    timestamp = iobeam.Timestamp(now)
+    batch.add(timestamp, {"temperature": t})
+    iobeamClient.addDataBatch(batch)
 
-    # You can also pass a specific timestamp
-    now = ... # e.g., now = int(time.time() * 1000) (import time first)
-    d = iobeam.DataPoint(t, timestamp=now)
+The value is passed in via a dictionary, keyed by which data stream it belongs
+to. Additionally, a timestamp is provided, see the following section for more
+information on creating timestamps.
 
-(The value can be integral or real. If the timestamp provided is an integer, it
-is assumed to be milliseconds; for other units, see the following section.)
+Note that the `iobeam.DataBatch` object can hold several streams at once. For
+example, if you also had a `getHumidity()` function, you could track both in
+the same `DataBatch`:
 
-Now, pick a name for your data series (e.g., "temperature"), and add the
-`iobeam.DataPoint` under that series:
-
-    iobeamClient.addDataPoint("temperature", d)
-
-Note that the `iobeam.Iobeam` object can hold several series at once. For
-example, if you also had a `getHumidity()` function, you could add both
-data points to the same `iobeam.Iobeam`:
+    batch = iobeam.DataBatch(["temperature", "humidity"])
 
     now = ... # current time
-    dt = iobeam.DataPoint(getTemperature(), timestamp=now)
-    dh = iobeam.DataPoint(getHumidity(), timestamp=now)
+    timestamp = iobeam.Timestamp(now)
 
-    iobeamClient.addDataPoint("temperature", dt)
-    iobeamClient.addDataPoint("humidity", dh)
+    temp = getTemperature()
+    humidity = getHumidity()
+    batch.add(timestamp, {"temperature": temp, "humidity": humidity})
+    iobeamClient.addDataBatch(batch)
+
+Not every `add()` call needs all streams to have a value; if a stream is omitted
+from the dictionary, it will be assumed to be `None`.
 
 ### Timestamps
 
@@ -238,12 +249,15 @@ Here's the full source code for our example:
     ...
 
     # Data gathering
-    now = int(time.time() * 1000)
-    dt = iobeam.DataPoint(getTemperature(), timestamp=now)
-    dh = iobeam.DataPoint(getHumidity(), timestamp=now)
+    batch = iobeam.DataBatch(["temperature", "humidity"])
+    now = ... # current time
+    timestamp = iobeam.Timestamp(now)
 
-    iobeamClient.addDataPoint("temperature", dt)
-    iobeamClient.addDataPoint("humidity", dh)
+    temp = getTemperature()
+    humidity = getHumidity()
+    batch.add(timestamp, {"temperature": temp, "humidity": humidity})
+
+    iobeamClient.addDataBatch(batch)
 
     ...
 

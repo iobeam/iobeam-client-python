@@ -84,7 +84,7 @@ _Note: This way should be considered legacy and users should use the previous
 method whenever possible. This could be removed in future releases._
 
 Prior to v0.8.0, adding data consisted of creating a `DataPoint` for each measurement
-and adding it to a specific series using `addDatPoint()` on a iobeam client object.
+and adding it to a specific series using `addDataPoint()` on a iobeam client object.
 Similarly, you could add a named group of points using a `DataSeries` object and
 `addDataSeries()`. This method could be a bit onerous, however, when you had multiple
 data streams that were always added together, e.g. an accelerometer. Using
