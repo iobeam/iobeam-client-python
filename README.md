@@ -35,6 +35,10 @@ installed. You can get it via pip:
 
     pip install requests
 
+Also, the PyJWT library:
+
+    pip install pyjwt
+
 If you are using Python2, or a version of Python3 earlier than 3.5, you will need
 the `enum34` library as well:
 
