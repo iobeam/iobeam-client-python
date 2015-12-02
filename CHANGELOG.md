@@ -12,6 +12,11 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 12/02/15 - v0.8.0
+- Automatic refresh of project tokens when they are expired. It is recommended that you
+update as soon as possible to avoid breakage.
+- bugfix: device ids are no longer allowed to be non-strings when registering
+
 ### 10/20/15 - v0.7.0
 - *IMPORTANT*: previously sent data points were being kept and sent on subsequent sends, this
 has been fixed
