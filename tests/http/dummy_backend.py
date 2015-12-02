@@ -11,6 +11,7 @@ if utils.IS_PY3:
 
 AUTH = "Authorization"
 TOKEN = "dummy"
+NEW_TOKEN = "newdummy"
 _STATUS_CODE = "status_code"
 
 class DummyBackend(request.DummyRequest):
@@ -37,6 +38,9 @@ class DummyBackend(request.DummyRequest):
         self.lastJson = json
         self.calls += 1
 
+        if url.endswith("/tokens/project"):
+            return Resp(self.refreshToken(self.body["refresh_token"]))
+
         if AUTH not in headers or (headers[AUTH] != "Bearer {}".format(TOKEN)):
             return Resp({
                 _STATUS_CODE: 403,
@@ -56,6 +60,12 @@ class DummyBackend(request.DummyRequest):
             return Resp(self.getData())
         else:
             return None
+
+    def refreshToken(self, oldToken):
+        if oldToken == TOKEN:
+            return {_STATUS_CODE: 200, "token": NEW_TOKEN}
+        else:
+            return {_STATUS_CODE: 401, "message": "bad token"}
 
     def getTimestamp(self):
         return {

@@ -2,6 +2,7 @@
 from .endpoints import devices
 from .endpoints import exports
 from .endpoints import imports
+from .endpoints import tokens
 from .http import request
 from .resources import data
 from .resources import device
@@ -148,7 +149,20 @@ class _Client(object):
                                                     requester=backend)
         self._importService = imports.ImportService(projectToken,
                                                     requester=backend)
+        self._tokenService = tokens.TokenService(requester=backend)
+
+        self._checkToken()
     # pylint: enable=too-many-arguments
+
+    def _checkToken(self):
+        if utils.isExpiredToken(self.projectToken):
+            newToken = self._refreshToken()
+            if newToken is not None:
+                self.projectToken = newToken
+
+
+    def _refreshToken(self):
+        return self._tokenService.refreshToken(self.projectToken)
 
     def registerDevice(self, deviceId=None, deviceName=None, setOnDupe=False):
         """Registers the device with iobeam.
@@ -177,6 +191,7 @@ class _Client(object):
         if deviceId is not None:
             utils.checkValidDeviceId(deviceId)
 
+        self._checkToken()
         try:
             d = self._deviceService.registerDevice(self.projectId,
                                                    deviceId=deviceId,
@@ -269,6 +284,7 @@ class _Client(object):
         Raises:
             Exception - if sending the data fails.
         """
+        self._checkToken()
         pid = self.projectId
         did = self._activeDevice.deviceId
         dataset = self._dataset

@@ -1,4 +1,9 @@
+import sys
 import unittest
+if sys.version_info > (3, 2):
+    from unittest.mock import patch
+else:
+    from mock import patch
 
 from iobeam.utils import utils
 
@@ -8,6 +13,32 @@ _DEVICE_NAME = "py_test_device"
 
 
 class TestUtilsFuncs(unittest.TestCase):
+
+    def test_isExpiredToken(self):
+        token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImtpZCI6MTB9.eyJ1aWQiOjAsInBpZCI6NywiZXhwIjoxNDQ5MjM0NjYwLCJwbXMiOjN9.nosecret="
+        expiry = 1449234660  # pre-determined by parsing above token
+        fudgeSecs = utils.EXPIRY_FUDGE / 1000
+
+        # should be fine
+        with patch.object(utils.time, "time", return_value=(expiry / 2)):
+            self.assertFalse(utils.isExpiredToken(token))
+
+        # exact match = True
+        with patch.object(utils.time, "time", return_value=(expiry - fudgeSecs)):
+            self.assertTrue(utils.isExpiredToken(token))
+
+        # just inside fudge factor = True
+        with patch.object(utils.time, "time", return_value=(expiry - fudgeSecs + 1)):
+            self.assertTrue(utils.isExpiredToken(token))
+
+        # expiry = True
+        with patch.object(utils.time, "time", return_value=expiry):
+            self.assertTrue(utils.isExpiredToken(token))
+
+        # expiry + 1 = True
+        with patch.object(utils.time, "time", return_value=(expiry + 1)):
+            self.assertTrue(utils.isExpiredToken(token))
+
 
     def test_checkValidProjectId(self):
         def verify(pid, msg):
