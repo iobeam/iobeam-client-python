@@ -1,5 +1,7 @@
 """Common utility functions."""
+import jwt
 import sys
+import time
 
 IS_PY3 = sys.version_info >= (3, 0)
 
@@ -9,6 +11,30 @@ if IS_PY3:
     unicode = str
     long = int
 # pylint: enable=redefined-builtin,invalid-name
+
+EXPIRY_FUDGE = 1000 * 60 * 60 * 24  # one day in milliseconds
+
+def isExpiredToken(projectToken):
+    """Check if token's expiry date (minus a bit) has passed.
+
+    Token is expired if the current time is after the expiry date less EXPIRY_FUDGE.
+
+    Params:
+        projectToken - JWT token to decode
+
+    Returns:
+        True if expired; False otherwise.
+
+    Raises:
+        ValueError - projectToken is not a valid token
+    """
+    checkValidProjectToken(projectToken)
+    opts = {"verify_signature": False, "verify_exp": False}
+    decoded = jwt.decode(projectToken, '', options=opts)
+    exp = int(decoded["exp"]) * 1000
+    now = int(time.time() * 1000)
+    
+    return now >= (exp - EXPIRY_FUDGE)
 
 
 def checkValidProjectId(projectId):

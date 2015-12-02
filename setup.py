@@ -17,7 +17,7 @@ VERSION = '0.7.0'
 #converts markdown to reStructured
 long_description = pypandoc.convert('CHANGELOG.md', 'rst', format='markdown')
 
-install_requires = ['requests']
+install_requires = ['requests', 'pyjwt']
 if "--python-tag" in sys.argv:
     i = 0
     while i < len(sys.argv):
