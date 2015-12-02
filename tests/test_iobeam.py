@@ -11,6 +11,9 @@ from iobeam.resources import data
 from tests.http import dummy_backend
 from tests.http import request
 
+def checkTokenNone():
+    pass
+
 DummyBackend = dummy_backend.DummyBackend
 
 class TestClientBuilder(unittest.TestCase):
@@ -48,7 +51,8 @@ class TestClientBuilder(unittest.TestCase):
 
     def test_buildBasic(self):
         builder = iobeam.ClientBuilder(1, "dummy")
-        client = builder.build()
+        with patch.object(iobeam._Client, "_checkToken"):
+            client = builder.build()
 
         self.assertTrue(client is not None)
         self.assertTrue(isinstance(client, iobeam._Client))
@@ -62,13 +66,16 @@ class TestClientBuilder(unittest.TestCase):
         dummy = DummyBackend()
         backend = request.DummyRequester(dummy)
         builder._backend = backend
-        client = builder.build()
+        with patch.object(iobeam._Client, "_checkToken"):
+            client = builder.build()
+
         self.assertEqual("test", client.getDeviceId())
         self.assertEqual(1, dummy.calls)
 
         builder = iobeam.ClientBuilder(1, "dummy").registerOrSetId("test")
         builder._backend = backend
-        client2 = builder.build()
+        with patch.object(iobeam._Client, "_checkToken"):
+            client2 = builder.build()
         self.assertEqual("test", client2.getDeviceId())
         self.assertEqual(2, dummy.calls)
 
@@ -109,12 +116,14 @@ class TestClient(unittest.TestCase):
         self.assertEqual(0, len(client._dataset))
 
     def _makeTempClient(self, backend=None, deviceId=None):
-        return iobeam._Client(None, 1, "dummy", backend, deviceId=deviceId)
+        with patch.object(iobeam._Client, "_checkToken"):
+            return iobeam._Client(None, 1, "dummy", backend, deviceId=deviceId)
 
     def test_constructorBasic(self):
-        client = iobeam._Client(None, 1, "dummy", None)
-        self._testClientState(client, 1, "dummy", None)
-        self.assertTrue(client._activeDevice is None)
+        with patch.object(iobeam._Client, "_checkToken", return_value=None):
+            client = iobeam._Client(None, 1, "dummy", None)
+            self._testClientState(client, 1, "dummy", None)
+            self.assertTrue(client._activeDevice is None)
 
     def test_isRegistered(self):
         client = self._makeTempClient()
@@ -227,6 +236,8 @@ class TestClient(unittest.TestCase):
         dummy = DummyBackend()
         backend = request.DummyRequester(dummy)
         client = self._makeTempClient(backend=backend)
+        client._checkToken = checkTokenNone
+
         self.assertTrue(client._activeDevice is None)
         client.registerDevice()
         self.assertTrue(client._activeDevice is not None)
@@ -248,6 +259,8 @@ class TestClient(unittest.TestCase):
         dummy = DummyBackend()
         backend = request.DummyRequester(dummy)
         client = self._makeTempClient(backend=backend)
+        client._checkToken = checkTokenNone
+
         self.assertTrue(client._activeDevice is None)
         client.registerDevice(deviceId="dummy")
         self.assertTrue("dummy", client.getDeviceId())
@@ -255,6 +268,7 @@ class TestClient(unittest.TestCase):
 
         backend = request.DummyRequester(dummy)
         client = self._makeTempClient(backend=backend)
+        client._checkToken = checkTokenNone
         try:
             client.registerDevice(deviceId="dummy")
             self.assertTrue(False)
@@ -285,6 +299,7 @@ class TestClient(unittest.TestCase):
         dummy = DummyBackend()
         backend = request.DummyRequester(dummy)
         client = self._makeTempClient(backend=backend, deviceId="fake")
+        client._checkToken = checkTokenNone
 
         series = "test"
         vals = [0, 11, 28]

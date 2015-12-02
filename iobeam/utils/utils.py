@@ -26,14 +26,17 @@ def isExpiredToken(projectToken):
         True if expired; False otherwise.
 
     Raises:
-        ValueError - projectToken is not a valid token
+        ValueError - projectToken is not a valid JWT token
     """
     checkValidProjectToken(projectToken)
     opts = {"verify_signature": False, "verify_exp": False}
-    decoded = jwt.decode(projectToken, '', options=opts)
+    try:
+        decoded = jwt.decode(projectToken, '', options=opts)
+    except jwt.DecodeError:
+        raise ValueError("invalid jwt token")
     exp = int(decoded["exp"]) * 1000
     now = int(time.time() * 1000)
-    
+
     return now >= (exp - EXPIRY_FUDGE)
 
 
