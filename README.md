@@ -95,24 +95,26 @@ Perhaps the most natural way is to let the device register itself.
 There are two ways to register a `device_id`:
 
 (1) Let iobeam generate one for you:
+```python
+from iobeam import iobeam
 
-    from iobeam import iobeam
+...
 
-    ...
-
-    builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
-                  .saveToDisk().registerDevice()
-    iobeamClient = builder.build()
+builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
+                .saveToDisk().registerDevice()
+iobeamClient = builder.build()
+```
 
 (2) Provide your own (must be unique to your project):
+```python
+from iobeam import iobeam
 
-    from iobeam import iobeam
+...
 
-    ...
-
-    builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
-                  .saveToDisk().registerDevice(deviceId="my_desired_id")
-    iobeamClient = builder.build()
+builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
+                .saveToDisk().registerDevice(deviceId="my_desired_id")
+iobeamClient = builder.build()
+```
 
 With the `saveToDisk()` call, the `device_id` will be saved to disk in the
 directory the script is called from (optionally, you can supply a `path`).
@@ -125,14 +127,15 @@ it will get a new random ID from us. If you provide a _different_ `device_id` to
 If you have registered a `device_id` (e.g. using our
 [CLI](https://github.com/iobeam/iobeam)), you can pass this to the `Builder` instead
 of registering:
+```python
+from iobeam import iobeam
 
-    from iobeam import iobeam
+...
 
-    ...
-
-    builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
-                  .saveToDisk().setDeviceId(DEVICE_ID)
-    iobeamClient = builder.build()
+builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
+                .saveToDisk().setDeviceId(DEVICE_ID)
+iobeamClient = builder.build()
+```
 
 You *must* have registered some other way (CLI, website, previous
 installation, etc) for this to work.
@@ -141,9 +144,10 @@ installation, etc) for this to work.
 
 If you don't want the `device_id` to be automatically stored for you, simply
 exclude the `saveToDisk()` call while building:
-
-    builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN).registerDevice()
-    iobeamClient = builder.build()
+```python
+builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN).registerDevice()
+iobeamClient = builder.build()
+```
 
 This is useful for cases where you want to persist the ID yourself (e.g.
 in a settings file), or if you are making `Iobeam` objects that are
@@ -160,16 +164,18 @@ To track time-series data, you need to decide how to break down your data
 streams into "batches", a collection of data streams grouped together. You
 create a `iobeam.DataBatch` with a list of stream names that the batch contains.
 So if you're tracking just temperature in a batch:
-
-    batch = iobeam.DataBatch(["temperature"])
+```python
+batch = iobeam.DataBatch(["temperature"])
+```
 
 Then for every data point, you'll want to add it to the batch:
-
-    now = ...  # e.g., now = int(time.time() * 1000) (import time first)
-    t = getTemperature()
-    timestamp = iobeam.Timestamp(now)
-    batch.add(timestamp, {"temperature": t})
-    iobeamClient.addDataBatch(batch)
+```python
+now = ...  # e.g., now = int(time.time() * 1000) (import time first)
+t = getTemperature()
+timestamp = iobeam.Timestamp(now)
+batch.add(timestamp, {"temperature": t})
+iobeamClient.addDataBatch(batch)
+```
 
 The value is passed in via a dictionary, keyed by which data stream it belongs
 to. Additionally, a timestamp is provided, see the following section for more
@@ -178,16 +184,17 @@ information on creating timestamps.
 Note that the `iobeam.DataBatch` object can hold several streams at once. For
 example, if you also had a `getHumidity()` function, you could track both in
 the same `DataBatch`:
+```python
+batch = iobeam.DataBatch(["temperature", "humidity"])
 
-    batch = iobeam.DataBatch(["temperature", "humidity"])
+now = ... # current time
+timestamp = iobeam.Timestamp(now)
 
-    now = ... # current time
-    timestamp = iobeam.Timestamp(now)
-
-    temp = getTemperature()
-    humidity = getHumidity()
-    batch.add(timestamp, {"temperature": temp, "humidity": humidity})
-    iobeamClient.addDataBatch(batch)
+temp = getTemperature()
+humidity = getHumidity()
+batch.add(timestamp, {"temperature": temp, "humidity": humidity})
+iobeamClient.addDataBatch(batch)
+```
 
 Not every `add()` call needs all streams to have a value; if a stream is omitted
 from the dictionary, it will be assumed to be `None`.
@@ -198,21 +205,22 @@ By default, if you pass just an integer for timestamp when
 constructing an `iobeam.DataPoint`, it will set the unit as
 milliseconds. To specify other precisions, you need to use the
 `iobeam.Timestamp` and `iobeam.TimeUnit` classes:
+```python
+# Timestamps in seconds:
+now = int(time.time())
+ts = iobeam.Timestamp(now, unit=iobeam.TimeUnit.SECONDS)
+dp = iobeam.DataPoint(t, timestamp=ts)
 
-    # Timestamps in seconds:
-    now = int(time.time())
-    ts = iobeam.Timestamp(now, unit=iobeam.TimeUnit.SECONDS)
-    dp = iobeam.DataPoint(t, timestamp=ts)
+# Another way to do milliseconds:
+now = int(time.time() * 1000)
+ts = iobeam.Timestamp(now, unit=iobeam.TimeUnit.MILLISECONDS)
+dp = iobeam.DataPoint(t, timestamp=ts)
 
-    # Another way to do milliseconds:
-    now = int(time.time() * 1000)
-    ts = iobeam.Timestamp(now, unit=iobeam.TimeUnit.MILLISECONDS)
-    dp = iobeam.DataPoint(t, timestamp=ts)
-
-    # Timestamps in microseconds:
-    now = int(time.time() * 1000000)
-    ts = iobeam.Timestamp(now, unit=iobeam.TimeUnit.MICROSECONDS)
-    dp = iobeam.DataPoint(t, timestamp=ts)
+# Timestamps in microseconds:
+now = int(time.time() * 1000000)
+ts = iobeam.Timestamp(now, unit=iobeam.TimeUnit.MICROSECONDS)
+dp = iobeam.DataPoint(t, timestamp=ts)
+```
 
 Currently we support expressing timestamps in seconds, milliseconds,
 and microseconds.
@@ -221,8 +229,9 @@ and microseconds.
 
 You can send your data stored in `iobeam.Iobeam` to the iobeam backend
 easily:
-
-    iobeamClient.send()
+```python
+iobeamClient.send()
+```
 
 This call is blocking and will attempt to send all your data. It will
 return `True` if successful.
@@ -231,39 +240,40 @@ return `True` if successful.
 ### Full Example
 
 Here's the full source code for our example:
+```python
+from iobeam import iobeam
+import time
 
-    from iobeam import iobeam
-    import time
+# Constants initialization
+PATH = ... # Can be None if you don't want to persist device_id to disk
+PROJECT_ID = ... # int
+PROJECT_TOKEN = ... # String
 
-    # Constants initialization
-    PATH = ... # Can be None if you don't want to persist device_id to disk
-    PROJECT_ID = ... # int
-    PROJECT_TOKEN = ... # String
-    ...
+...
 
-    # Init iobeam
-    builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
-                  .saveToDisk().registerDevice()
-    iobeamClient = builder.build()
+# Init iobeam
+builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
+                .saveToDisk().registerDevice()
+iobeamClient = builder.build()
 
-    ...
+...
 
-    # Data gathering
-    batch = iobeam.DataBatch(["temperature", "humidity"])
-    now = ... # current time
-    timestamp = iobeam.Timestamp(now)
+# Data gathering
+batch = iobeam.DataBatch(["temperature", "humidity"])
+now = ... # current time
+timestamp = iobeam.Timestamp(now)
 
-    temp = getTemperature()
-    humidity = getHumidity()
-    batch.add(timestamp, {"temperature": temp, "humidity": humidity})
+temp = getTemperature()
+humidity = getHumidity()
+batch.add(timestamp, {"temperature": temp, "humidity": humidity})
 
-    iobeamClient.addDataBatch(batch)
+iobeamClient.addDataBatch(batch)
 
-    ...
+...
 
-    # Data transmission
-    iobeamClient.send()
-
+# Data transmission
+iobeamClient.send()
+```
 
 ## Retrieving Data
 
@@ -274,20 +284,22 @@ name (optional). If a series name is not given, all series for that device are
 retrieved. If a device name is not given, all devices will be queried.
 
 In the simplest form, here is how you make a few different queries:
+```python
+# all series from all devices in project PROJECT_ID
+q = iobeam.QueryReq(PROJECT_ID)
 
-    # all series from all devices in project PROJECT_ID
-    q = iobeam.QueryReq(PROJECT_ID)
+# all series from device DEVICE_ID in project PROJECT_ID
+q = iobeam.QueryReq(PROJECT_ID, deviceId=DEVICE_ID)
 
-    # all series from device DEVICE_ID in project PROJECT_ID
-    q = iobeam.QueryReq(PROJECT_ID, deviceId=DEVICE_ID)
-
-    # series "temp" from device DEVICE_ID in project PROJECT_ID
-    q = iobeam.QueryReq(PROJECT_ID, deviceId=DEVICE_ID, seriesName="temp")
+# series "temp" from device DEVICE_ID in project PROJECT_ID
+q = iobeam.QueryReq(PROJECT_ID, deviceId=DEVICE_ID, seriesName="temp")
+```
 
 Then to actually execute the query:
-
-    # token is a project token with read access
-    res = iobeam.makeQuery(token, q)
+```python
+# token is a project token with read access
+res = iobeam.makeQuery(token, q)
+```
 
 Your result will look something like this:
 
@@ -316,27 +328,28 @@ Your result will look something like this:
 
 You can modify your with several parameters, such as `to` and `from` and limits
 on the values you're interested in:
+```python
+# start with this basic query
+q = iobeam.QueryReq(PROJECT_ID, deviceId=DEVICE_ID, seriesName="temp")
 
-    # start with this basic query
-    q = iobeam.QueryReq(PROJECT_ID, deviceId=DEVICE_ID, seriesName="temp")
+# Last 5 results after a given START:
+q = q.limit(5).fromTime(START)
 
-    # Last 5 results after a given START:
-    q = q.limit(5).fromTime(START)
+# All results between two times, START and END
+q = q.fromTime(START).toTime(END)
+# OR...
+q = q.inTimeRange(START, END)
 
-    # All results between two times, START and END
-    q = q.fromTime(START).toTime(END)
-    # OR...
-    q = q.inTimeRange(START, END)
-
-    # All results where the value is greater than 0
-    q = q.greaterThan(0)
+# All results where the value is greater than 0
+q = q.greaterThan(0)
+```
 
 By default, time values are treated as milliseconds. If you'd like to
 use a different (seconds or microseconds) you can initialize the
 query like this:
-
-    q = iobeam.QueryReq(PROJECT_ID, timeUnit=iobeam.TimeUnit.MICROSECONDS)
-
+```python
+q = iobeam.QueryReq(PROJECT_ID, timeUnit=iobeam.TimeUnit.MICROSECONDS)
+```
 
 The full list of (chainable) parameters:
 
