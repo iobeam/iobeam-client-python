@@ -1,5 +1,6 @@
 """Common utility functions."""
 import jwt
+import logging
 import sys
 import time
 
@@ -82,3 +83,18 @@ def checkValidProjectToken(token):
                      (c) is of length 0.
     """
     __checkNon0LengthString(token, "token")
+
+__LOGGER = None
+
+def getLogger():
+    global __LOGGER
+    if __LOGGER is not None:
+        logger = __LOGGER
+    else:
+        logger = logging.getLogger("iobeam")
+        logger.setLevel(logging.WARNING)
+        __LOGGER = logger
+
+    if len(logger.handlers) == 0:
+        logger.addHandler(logging.NullHandler())
+    return logger

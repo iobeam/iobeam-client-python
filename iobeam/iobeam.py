@@ -8,6 +8,7 @@ from .resources import data
 from .resources import device
 from .resources import query
 from .utils import utils
+
 import os.path
 
 #  Aliases for resource types for convenience outside the package.
@@ -244,12 +245,16 @@ class _Client(object):
         Params:
             seriesName - The series to add the datapoint to
             datapoint - DataPoint to be added
+
+        Raises:
+            ValueError - If series name is None, not a string, or length 0.
         """
         if seriesName is None or not isinstance(seriesName, str):
-            return
+            raise ValueError("seriesName cannot be None or a non-string")
         elif len(seriesName) == 0:
-            return
+            raise ValueError("seriesName cannot be a 0-length string")
         elif datapoint is None or not isinstance(datapoint, data.DataPoint):
+            utils.getLogger().warning("tried to add an invalid or None datapoint")
             return
 
         if seriesName not in self._dataset:
@@ -263,11 +268,14 @@ class _Client(object):
 
         Params:
             dataseries - The DataSeries to add to the data store.
+
+        Raises:
+            ValueError - If dataseries is None or not a DataSeries object
         """
         if dataseries is None or not isinstance(dataseries, data.DataSeries):
-            # TODO - log warning
-            return
+            raise ValueError("dataseries was None or not a DataSeries")
         elif len(dataseries) == 0:
+            utils.getLogger().warning("tried to add empty dataseries")
             return
 
         key = dataseries.getName()
@@ -288,7 +296,7 @@ class _Client(object):
             batch - The DataBatch to add to the data store.
         """
         if batch is None:
-            # TODO - log warning
+            utils.getLogger().warning("adding batch was None")
             return
         elif not isinstance(batch, data.DataBatch):
             raise ValueError("batch must be a DataBatch")

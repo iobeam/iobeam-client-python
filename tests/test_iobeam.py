@@ -150,20 +150,32 @@ class TestClient(unittest.TestCase):
         except ValueError:
             pass
 
-    def test_addDataPointInvalid(self):
+    def test_addDataPointInvalidNames(self):
+        client = self._makeTempClient()
+        dp = iobeam.DataPoint(0)
+        def verify(series, point):
+            try:
+                client.addDataPoint(series, point)
+                self.assertTrue(False)
+            except ValueError:
+                pass
+
+        vals = [
+            (None, dp),
+            (1, dp),
+            ("", dp)
+        ]
+        for (series, point) in vals:
+            verify(series, point)
+
+    def test_addDataPointInvalidVals(self):
         client = self._makeTempClient()
         series = "test"
-        dp = iobeam.DataPoint(0)
         def verify0(series, point):
             client.addDataPoint(series, point)
             self.assertEqual(0, len(client._dataset))
 
         vals = [
-            # Bad series names
-            (None, dp),
-            (1, dp),
-            ("", dp),
-            # Bad point values
             (series, None),
             (series, "not a point")
         ]
@@ -196,12 +208,21 @@ class TestClient(unittest.TestCase):
     def test_addDataSeriesInvalid(self):
         client = self._makeTempClient()
         def verify0(val):
-            client.addDataSeries(val)
-            self.assertEqual(0, len(client._dataset))
+            try:
+                client.addDataSeries(val)
+                self.assertTrue(False)
+            except ValueError:
+                pass
 
-        vals = [None, "not a series", iobeam.DataSeries("test", None)]
+        vals = [None, "not a series"]
         for v in vals:
             verify0(v)
+
+    def test_addDataSeriesInvalidNoError(self):
+        client = self._makeTempClient()
+        client.addDataSeries(iobeam.DataSeries("test", None))
+        self.assertEqual(0, len(client._dataset))
+
 
     def test_addDataSeries(self):
         client = self._makeTempClient()
