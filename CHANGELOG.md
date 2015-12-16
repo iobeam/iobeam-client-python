@@ -12,6 +12,13 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 12/16/15 - v0.9.0
+- Adding data should now be done via the new `iobeam.createDataStore(columns)` method,
+which allows you to track multiple streams of data in one object.
+- Internally, old methods involving `DataPoint`s and `DataSerie`s have been converted
+to use `DataStore`s.
+- Additional documentation provided [here](docs/DataGuide.md).
+
 ### 12/02/15 - v0.8.0
 - Automatic refresh of project tokens when they are expired. It is recommended that you
 update as soon as possible to avoid breakage.
@@ -27,7 +34,7 @@ has been fixed
 - utils: Adds a check for whether this is python2 or 3
 - New Error for duplicate ids
 - New `registerOrSetId()` added to `iobeam.ClientBuilder` to allow you to register a name, or
-if it already exists, set the client to use that id. 
+if it already exists, set the client to use that id.
 
 ### 10/05/15 - v0.5.2
 - Fix missing return for `iobeam.makeQuery()`
