@@ -289,8 +289,23 @@ class _Client(object):
         """Removes any points associated with `seriesName`."""
         self._dataset.pop(seriesName, None)
 
+    def createDataStore(self, columns):
+        """Create a DataStore that is tracked by this client.
+
+        Params:
+            columns - List of stream names for the DataStore
+
+        Returns:
+            DataStore object with those columns and being tracked
+            by this client for sending.
+        """
+        ds = data.DataStore(columns)
+        self._batches.append(ds)
+
+        return ds
+
     def addDataStore(self, store):
-        """Add a DataStore to the data store.
+        """Add a DataStore to this client.
 
         Params:
             store - The DataStore to add to the data store.
