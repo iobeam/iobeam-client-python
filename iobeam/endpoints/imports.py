@@ -42,13 +42,13 @@ class ImportService(service.EndpointService):
         return req
 
     @staticmethod
-    def _makeBatchRequest(projectId, deviceId, dataBatch):
-        """Creates the body of a batch import request.
+    def _makeBatchRequest(projectId, deviceId, dataStore):
+        """Creates the body of a table import request.
 
         Params:
             projectId - Project ID of the request
             deviceId - Device ID of the request
-            dataBatch - The DataBatch that makes the body of the request.
+            dataStore - The DataStore that makes the body of the request.
 
         Returns:
             A dictionary that is the body of an import request.
@@ -62,10 +62,10 @@ class ImportService(service.EndpointService):
         }
 
         sources["fields"] = ["time"]
-        for f in dataBatch.fields():
+        for f in dataStore.columns():
             sources["fields"].append(f)
         sources["data"] = []
-        for r in dataBatch.rows():
+        for r in dataStore.rows():
             row = []
             for f in sources["fields"]:
                 row.append(r[f])
@@ -129,7 +129,7 @@ class ImportService(service.EndpointService):
 
     @staticmethod
     def _makeListOfBatchReqs(projectId, deviceId, dataBatch):
-        """Creates a list of import requests from a DataBatch.
+        """Creates a list of import requests from a DataStore.
 
         If the data set is under _BATCH_SIZE, it will be one request. Otherwise
         it will be split into multiple requests of at most _BACH_SIZE data
@@ -154,7 +154,7 @@ class ImportService(service.EndpointService):
             reqs.append(ImportService._makeBatchRequest(projectId, deviceId, dataBatch))
         # Need to create multiple requests
         else:
-            maxRowsPerBatch = ImportService._BATCH_SIZE // len(dataBatch.fields())
+            maxRowsPerBatch = ImportService._BATCH_SIZE // len(dataBatch.columns())
             batches = dataBatch.split(maxRowsPerBatch)
             for b in batches:
                 reqs.append(ImportService._makeBatchRequest(projectId, deviceId, b))
@@ -206,7 +206,7 @@ class ImportService(service.EndpointService):
 
         return (success, extra)
 
-    def importBatch(self, projectId, deviceId, dataBatch):
+    def importBatch(self, projectId, deviceId, dataStore):
         """Wraps API call `POST /imports?fmt=table`
 
         Sends data to the iobeam backend to be stored.
@@ -214,7 +214,7 @@ class ImportService(service.EndpointService):
         Params:
             projectId - Project ID the data belongs to
             deviceId - Device ID the data belongs to
-            dataBatch - A `DataBatch` object containing the the data to be imported
+            dataStore - A `DataStore` object containing the the data to be imported
 
         Returns:
             A tuple where the first item is the success of all of the requests (True if
@@ -227,11 +227,12 @@ class ImportService(service.EndpointService):
         utils.checkValidProjectId(projectId)
         utils.checkValidProjectToken(self.token)
         utils.checkValidDeviceId(deviceId)
-        if dataBatch is None or len(dataBatch) == 0:
+        if dataStore is None or len(dataStore) == 0:
+            utils.getLogger().warning("Attempted to send with no data")
             return (True, None)
         endpoint = self.makeEndpoint("imports")
 
-        reqs = ImportService._makeListOfBatchReqs(projectId, deviceId, dataBatch)
+        reqs = ImportService._makeListOfBatchReqs(projectId, deviceId, dataStore)
         success = True
         extra = None
         for req in reqs:

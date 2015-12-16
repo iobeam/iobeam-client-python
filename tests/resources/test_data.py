@@ -122,25 +122,26 @@ class TestDataPoint(unittest.TestCase):
         self.assertEqual(5, ret["value"])
 
 
-class TestDataBatch(unittest.TestCase):
+class TestDataStore(unittest.TestCase):
 
     def test_constructor(self):
-        fields = ["a", "boo", "cola"]
-        db = data.DataBatch(fields)
-        self.assertEqual(3, len(db.fields()))
-        for i in range(0, len(fields)):
-            self.assertEqual(fields[i], db.fields()[i])
+        columns = ["a", "boo", "cola"]
+        ds = data.DataStore(columns)
+        self.assertEqual(3, len(ds.columns()))
+        for i in range(0, len(columns)):
+            self.assertEqual(columns[i], ds.columns()[i])
+
         # check defensive constructor
-        fields.append("done")
-        self.assertEqual(3, len(db.fields()))
+        columns.append("done")
+        self.assertEqual(3, len(ds.columns()))
         # check defensive getter
-        db.fields().append("done")
-        self.assertEqual(3, len(db.fields()))
+        ds.columns().append("done")
+        self.assertEqual(3, len(ds.columns()))
 
     def test_constructorBad(self):
         def verify(fields):
             try:
-                _ = data.DataBatch(fields)
+                _ = data.DataStore(fields)
                 self.assertTrue(False)
             except ValueError:
                 pass
@@ -150,34 +151,34 @@ class TestDataBatch(unittest.TestCase):
             verify(c)
 
     def test_add(self):
-        fields = ["a", "b", "c"]
-        db = data.DataBatch(fields)
-        self.assertEqual(0, len(db.rows()))
-        self.assertEqual(0, len(db))
-        db.add(0, {"a": 1, "b": 2, "c": 3})
-        self.assertEqual(1, len(db.rows()))
-        self.assertEqual(3, len(db))
-        r1 = db.rows()[0]
+        columns = ["a", "b", "c"]
+        ds = data.DataStore(columns)
+        self.assertEqual(0, len(ds.rows()))
+        self.assertEqual(0, len(ds))
+        ds.add(0, {"a": 1, "b": 2, "c": 3})
+        self.assertEqual(1, len(ds.rows()))
+        self.assertEqual(3, len(ds))
+        r1 = ds.rows()[0]
         self.assertEqual(0, r1["time"])
         self.assertEqual(1, r1["a"])
         self.assertEqual(2, r1["b"])
         self.assertEqual(3, r1["c"])
 
-        db.add(1, {"a": 4, "c": 6})
-        self.assertEqual(2, len(db.rows()))
-        self.assertEqual(6, len(db))
-        r2 = db.rows()[1]
+        ds.add(1, {"a": 4, "c": 6})
+        self.assertEqual(2, len(ds.rows()))
+        self.assertEqual(6, len(ds))
+        r2 = ds.rows()[1]
         self.assertEqual(1000, r2["time"])
         self.assertEqual(4, r2["a"])
         self.assertEqual(None, r2["b"])
         self.assertEqual(6, r2["c"])
 
     def test_addBad(self):
-        fields = ["a", "b", "c"]
-        db = data.DataBatch(fields)
+        columns = ["a", "b", "c"]
+        ds = data.DataStore(columns)
         def verify(time, data):
             try:
-                db.add(time, data)
+                ds.add(time, data)
                 self.assertTrue(False)
             except ValueError:
                 pass
@@ -193,16 +194,16 @@ class TestDataBatch(unittest.TestCase):
             verify(t, d)
 
     def test_split(self):
-        fields = ["a", "b", "c"]
-        db = data.DataBatch(fields)
+        columns = ["a", "b", "c"]
+        ds = data.DataStore(columns)
         for i in range(0, 10):
-            db.add(i, {"a": i, "b": i, "c": i})
-        batches = db.split(5)
+            ds.add(i, {"a": i, "b": i, "c": i})
+        batches = ds.split(5)
         self.assertEqual(2, len(batches))
         self.assertEqual(5, len(batches[0].rows()))
         self.assertEqual(5, len(batches[1].rows()))
 
-        batches = db.split(4)
+        batches = ds.split(4)
         self.assertEqual(3, len(batches))
         self.assertEqual(4, len(batches[0].rows()))
         self.assertEqual(4, len(batches[1].rows()))

@@ -30,17 +30,13 @@ The easiest way to install is to use `pip`:
 
 #### Installing from source
 
-You will need the [requests](http://www.python-requests.org/en/latest/) library
-installed. You can get it via pip:
+You will need the `requests` and `pyjwt` libraries installed.
+You can get it via pip:
 
-    pip install requests
+    pip install requests pyjwt
 
-Also, the PyJWT library:
-
-    pip install pyjwt
-
-If you are using Python2, or a version of Python3 earlier than 3.5, you will need
-the `enum34` library as well:
+If you are using Python2, or Python3 earlier than 3.5,
+you will need the `enum34` library as well:
 
     pip install enum34
 
@@ -64,10 +60,12 @@ At a high-level, here's how it works:
 1. Make sure your device is registered, either generating a `device_id` in
 code or via another method (e.g., our CLI or REST APIs).
 
-1. Create a `iobeam.DataPoint` object for each time-series data point. Or,
-for a collection of data points, create a `iobeam.DataSeries` object.
+1. Create `iobeam.DataStore` objects for your data streams.
+You can create one object per stream, or, if you have streams that are always
+collected together (e.g. the axes of a gyroscope), you can put them in
+one object.
 
-1. Add the `iobeam.DataPoint` under your `series_name` (e.g., "temperature")
+1. Add data values to your `iobeam.DataStore` objects.
 
 1. When you're ready, send your data to the iobeam backend
 
@@ -161,43 +159,38 @@ For a more in-depth discussion about adding data, please see [our guide on
 adding data](docs/DataGuide.md).
 
 To track time-series data, you need to decide how to break down your data
-streams into "batches", a collection of data streams grouped together. You
-create a `iobeam.DataBatch` with a list of stream names that the batch contains.
-So if you're tracking just temperature in a batch:
+streams into "stores", a collection of data streams grouped together. You
+create a `iobeam.DataStore` with a list of stream names that it contains.
+So if you're tracking just temperature in a store called `conditions`:
 ```python
-batch = iobeam.DataBatch(["temperature"])
+conditions = iobeam.createDataStore(["temperature"])
 ```
 
-Then for every data point, you'll want to add it to the batch:
+Then for every data point, you'll want to add it to the store:
 ```python
 now = ...  # e.g., now = int(time.time() * 1000) (import time first)
 t = getTemperature()
-timestamp = iobeam.Timestamp(now)
-batch.add(timestamp, {"temperature": t})
-iobeamClient.addDataBatch(batch)
+conditions.add(iobeam.Timestamp(now), {"temperature": t})
 ```
 
-The value is passed in via a dictionary, keyed by which data stream it belongs
-to. Additionally, a timestamp is provided, see the following section for more
-information on creating timestamps.
+The values are passed in via a dictionary, keyed by which data stream the
+individual values belong to along with a timestamp.
+_(For more on timestamps, see the next section.)_
 
-Note that the `iobeam.DataBatch` object can hold several streams at once. For
+The `iobeam.DataStore` object can hold several streams at once. For
 example, if you also had a `getHumidity()` function, you could track both in
-the same `DataBatch`:
+the same `DataStore`:
 ```python
-batch = iobeam.DataBatch(["temperature", "humidity"])
+conditions = iobeam.createDataStore(["temperature", "humidity"])
 
 now = ... # current time
-timestamp = iobeam.Timestamp(now)
-
 temp = getTemperature()
 humidity = getHumidity()
-batch.add(timestamp, {"temperature": temp, "humidity": humidity})
-iobeamClient.addDataBatch(batch)
+conditions.add(iobeam.Timestamp(now), {"temperature": temp, "humidity": humidity})
 ```
 
-Not every `add()` call needs all streams to have a value; if a stream is omitted
-from the dictionary, it will be assumed to be `None`.
+Not every `add()` call needs all streams to have a value; if a stream is
+omitted from the dictionary, it will be assumed to be `None`.
 
 ### Timestamps
 
@@ -237,7 +230,7 @@ This call is blocking and will attempt to send all your data. It will
 return `True` if successful.
 
 
-### Full Example
+### Full Sending Example
 
 Here's the full source code for our example:
 ```python
@@ -255,19 +248,17 @@ PROJECT_TOKEN = ... # String
 builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
                 .saveToDisk().registerDevice()
 iobeamClient = builder.build()
+conditions = iobeam.createDataStore(["temperature", "humidity"])
 
 ...
 
 # Data gathering
-batch = iobeam.DataBatch(["temperature", "humidity"])
 now = ... # current time
-timestamp = iobeam.Timestamp(now)
+ts = iobeam.Timestamp(now)
 
 temp = getTemperature()
 humidity = getHumidity()
-batch.add(timestamp, {"temperature": temp, "humidity": humidity})
-
-iobeamClient.addDataBatch(batch)
+conditions.add(ts, {"temperature": temp, "humidity": humidity})
 
 ...
 
