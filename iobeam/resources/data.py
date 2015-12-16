@@ -134,11 +134,11 @@ class DataPoint(object):
         }
 
 
-class DataBatch(object):
-    """A collection of DataPoint series with rows batched by time."""
+class DataStore(object):
+    """A collection of data streams with rows batched by time."""
 
-    def __init__(self, fields):
-        """Construct a new DataBatch object with given fields.
+    def __init__(self, columns):
+        """Construct a new DataStore object with given columns.
 
         Params:
             fields - Column or series names for data in this batch.
@@ -146,15 +146,15 @@ class DataBatch(object):
         Raises:
             ValueError - If `fields` is None, empty, or not a list.
         """
-        if fields is None or len(fields) == 0:
-            raise ValueError("fields cannot be None or empty")
-        if not isinstance(fields, list):
-            raise ValueError("fields must be a list of strings")
-        self._fields = list(fields)  # defensive copy
+        if columns is None or len(columns) == 0:
+            raise ValueError("columns cannot be None or empty")
+        if not isinstance(columns, list):
+            raise ValueError("columns must be a list of strings")
+        self._columns = list(columns)  # defensive copy
         self._rows = []
 
     def add(self, timestamp, dataDict):
-        """Add row of data at a timestamp to batch.
+        """Add row of data at a given timestamp.
 
         Params:
             timestamp - Timestamp for all points to share
@@ -164,7 +164,7 @@ class DataBatch(object):
             ValueError - For multiple cases:
                 (a) timestamp is neither an int or a Timestamp type
                 (b) dataDict is empty or None
-                (b) dataDict contains keys not in this batch
+                (b) dataDict contains keys not in this store
         """
         ts = None
         # validate timestamp
@@ -179,49 +179,49 @@ class DataBatch(object):
         if dataDict is None or len(dataDict) == 0:
             raise ValueError("dataDict cannot be None or empty")
         for k in dataDict:
-            if k not in self._fields:
-                raise ValueError("dataDict can only contain keys in this batch's fields")
+            if k not in self._columns:
+                raise ValueError("dataDict can only contain keys in this store's columns")
 
         # everything ok, make row
         row = {"time": ts.asMicroseconds()}
-        for f in self._fields:
+        for f in self._columns:
             if f in dataDict:
                 row[f] = dataDict[f]
             else:
                 row[f] = None
         self._rows.append(row)
 
-    def fields(self):
-        """Return a copy of the fields in this batch."""
-        return list(self._fields)
+    def columns(self):
+        """Return a copy of the columns in this store."""
+        return list(self._columns)
 
     def rows(self):
-        """Return a copy of the rows in this batch."""
+        """Return a copy of the rows in this store."""
         ret = []
         for r in self._rows:
             ret.append(r.copy())
         return ret
 
     def split(self, chunkSize):
-        """Split a batch into multiple batches with `chunkSize` rows.
+        """Split a store into multiple batches with `chunkSize` rows.
 
         Params:
             chunkSize - Max number of rows to include in a split
 
         Returns:
-            List of DataBatchs containing at most chunkSize rows from this batch.
+            List of DataStores containing at most chunkSize rows from this store.
         """
         ret = []
         for i in range(0, len(self._rows), chunkSize):
-            temp = DataBatch(self._fields)
+            temp = DataStore(self._columns)
             temp._rows = self._rows[i:i+chunkSize]
             ret.append(temp)
 
         return ret
 
     def __len__(self):
-        """Return the size of this batch in terms of data points."""
-        return len(self._rows) * len(self._fields)
+        """Return the size of this store in terms of data points."""
+        return len(self._rows) * len(self._columns)
 
 
 class DataSeries(object):

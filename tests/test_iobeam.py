@@ -335,8 +335,8 @@ class TestClient(unittest.TestCase):
         self.assertEqual(0, len(client._dataset))
         self.assertEqual(1, len(client._batches))
         for b in client._batches:
-            self.assertEqual(1, len(b.fields()))
-            self.assertEqual(series, b.fields()[0])
+            self.assertEqual(1, len(b.columns()))
+            self.assertEqual(series, b.columns()[0])
             self.assertEqual(2, len(b))
 
     def test_send(self):

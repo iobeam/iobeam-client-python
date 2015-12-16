@@ -12,7 +12,7 @@ from .utils import utils
 import os.path
 
 #  Aliases for resource types for convenience outside the package.
-DataBatch = data.DataBatch
+DataStore = data.DataStore
 DataPoint = data.DataPoint
 DataSeries = data.DataSeries
 Timestamp = data.Timestamp
@@ -289,26 +289,26 @@ class _Client(object):
         """Removes any points associated with `seriesName`."""
         self._dataset.pop(seriesName, None)
 
-    def addDataBatch(self, batch):
-        """Add a DataBatch to the data store.
+    def addDataStore(self, store):
+        """Add a DataStore to the data store.
 
         Params:
-            batch - The DataBatch to add to the data store.
+            store - The DataStore to add to the data store.
         """
-        if batch is None:
-            utils.getLogger().warning("adding batch was None")
+        if store is None:
+            utils.getLogger().warning("adding store was None")
             return
-        elif not isinstance(batch, data.DataBatch):
-            raise ValueError("batch must be a DataBatch")
-        elif len(batch) == 0:
+        elif not isinstance(batch, data.DataStore):
+            raise ValueError("store must be a DataStore")
+        elif len(store) == 0:
             return
 
-        self._batches.append(batch)
+        self._batches.append(store)
 
     def _convertDataSetToBatches(self):
         dataset = self._dataset
         for name in dataset:
-            batch = data.DataBatch([name])
+            batch = data.DataStore([name])
             for point in dataset[name]:
                 asDict = point.toDict()
                 ts = data.Timestamp(asDict["time"], unit=TimeUnit.MICROSECONDS)

@@ -10,7 +10,7 @@ _DEVICE_ID = "test_id"
 _TOKEN = dummy_backend.TOKEN
 
 ImportService = imports.ImportService
-DataBatch = data.DataBatch
+DataStore = data.DataStore
 DataPoint = data.DataPoint
 DummyBackend = dummy_backend.DummyBackend
 
@@ -128,8 +128,8 @@ class TestImportService(unittest.TestCase):
         self.assertEqual(dataRows, len(req["sources"]["data"]))
 
     def test_makeBatchRequest(self):
-        batch = data.DataBatch(["series1", "series2"])
-        FIELDS_LEN = 1 + len(batch.fields())
+        batch = DataStore(["series1", "series2"])
+        FIELDS_LEN = 1 + len(batch.columns())
         req = ImportService._makeBatchRequest(_PROJECT_ID, _DEVICE_ID, batch)
         self._basicBatchRequestChecks(req, FIELDS_LEN, 0)
 
@@ -139,7 +139,7 @@ class TestImportService(unittest.TestCase):
 
     def test_makeListOfBatchReqs(self):
         LIMIT = ImportService._BATCH_SIZE
-        batch = data.DataBatch(["series1", "series2"])
+        batch = DataStore(["series1", "series2"])
         reqs = ImportService._makeListOfBatchReqs(_PROJECT_ID, _DEVICE_ID, batch)
         self.assertEqual(0, len(reqs))
 
@@ -147,7 +147,7 @@ class TestImportService(unittest.TestCase):
         reqs = ImportService._makeListOfBatchReqs(_PROJECT_ID, _DEVICE_ID, batch)
         self.assertEqual(1, len(reqs))
 
-        limitRows = LIMIT // len(batch.fields()) - 1
+        limitRows = LIMIT // len(batch.columns()) - 1
         # just under limit
         for i in range(0, limitRows - 1):
             batch.add(i + 1, {"series1": i + 2, "series2": i + 3})
@@ -264,7 +264,7 @@ class TestImportService(unittest.TestCase):
         self.assertEqual(_TOKEN, service.token)
         self.assertTrue(service.requester() is not None)
 
-        batch = data.DataBatch(["t"])
+        batch = DataStore(["t"])
         for i in range(0, 10):
             batch.add(i, {"t": i})
         success, extra = service.importBatch(_PROJECT_ID, _DEVICE_ID, batch)
