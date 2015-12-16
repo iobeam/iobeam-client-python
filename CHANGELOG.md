@@ -17,7 +17,7 @@ to generate a valid token and use our APIs.
 which allows you to track multiple streams of data in one object.
 - Internally, old methods involving `DataPoint`s and `DataSerie`s have been converted
 to use `DataStore`s.
-- Additional documentation provided [here](docs/DataGuide.md).
+- Additional documentation provided [here](https://github.com/iobeam/iobeam-client-python/blob/master/docs/DataGuide.md).
 
 ### 12/02/15 - v0.8.0
 - Automatic refresh of project tokens when they are expired. It is recommended that you
