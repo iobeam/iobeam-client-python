@@ -153,6 +153,10 @@ class DataStore(object):
         self._columns = list(columns)  # defensive copy
         self._rows = []
 
+    def clear(self):
+        """Remove all data rows."""
+        del self._rows[:]
+
     def add(self, timestamp, dataDict):
         """Add row of data at a given timestamp.
 

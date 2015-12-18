@@ -322,6 +322,7 @@ class _Client(object):
 
     def _convertDataSetToBatches(self):
         dataset = self._dataset
+        batches = []
         for name in dataset:
             batch = data.DataStore([name])
             for point in dataset[name]:
@@ -330,8 +331,9 @@ class _Client(object):
                 row = {}
                 row[name] = asDict["value"]
                 batch.add(ts, row)
-            self._batches.append(batch)
+            batches.append(batch)
         self._dataset = {}
+        return batches
 
     def send(self):
         """Sends stored data to the iobeam backend.
@@ -342,15 +344,21 @@ class _Client(object):
         self._checkToken()
         pid = self.projectId
         did = self._activeDevice.deviceId
-        self._convertDataSetToBatches()
+        tempBatches = self._convertDataSetToBatches()
 
-        i = 0
         for b in list(self._batches):
             success, extra = self._importService.importBatch(pid, did, b)
             if not success:
                 raise Exception("send failed. server sent: {}".format(extra))
             else:
-                self._batches.remove(b)
+                b.clear()
+
+        # temp batches are not saved between calls; re-made each time
+        for b in tempBatches:
+            success, extra = self._importService.importBatch(pid, did, b)
+            if not success:
+                raise Exception("send failed. server sent: {}".format(extra))
+
 
     @staticmethod
     def query(token, qry, backend=None):

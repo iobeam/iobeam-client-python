@@ -331,10 +331,10 @@ class TestClient(unittest.TestCase):
         self.assertEqual(1, len(client._dataset))
         self.assertEqual(0, len(client._batches))
 
-        client._convertDataSetToBatches()
+        batches = client._convertDataSetToBatches()
         self.assertEqual(0, len(client._dataset))
-        self.assertEqual(1, len(client._batches))
-        for b in client._batches:
+        self.assertEqual(1, len(batches))
+        for b in batches:
             self.assertEqual(1, len(b.columns()))
             self.assertEqual(series, b.columns()[0])
             self.assertEqual(2, len(b))
@@ -351,6 +351,30 @@ class TestClient(unittest.TestCase):
         client.addDataPoint(series, dp)
 
         client.send()
+        self.assertEqual(0, len(client._batches))
+        self.assertEqual(0, len(client._dataset))
+        self.assertEqual(1, dummy.calls)
+        self.assertTrue(dummy.lastUrl.endswith("/imports"))
+        self.assertEqual(1, dummy.lastJson["project_id"])
+        self.assertEqual("fake", dummy.lastJson["device_id"])
+        # 2: 'fields' and 'data', batch format
+        self.assertEqual(2, len(dummy.lastJson["sources"]))
+
+    def test_sendWithBatch(self):
+        dummy = DummyBackend()
+        backend = request.DummyRequester(dummy)
+        client = self._makeTempClient(backend=backend, deviceId="fake")
+        client._checkToken = checkTokenNone
+
+        temp = client.createDataStore(["test"])
+        temp.add(iobeam.Timestamp(0), {"test": 0})
+        temp.add(iobeam.Timestamp(1), {"test": 11})
+        temp.add(iobeam.Timestamp(2), {"test": 28})
+        self.assertEqual(3, len(temp))
+
+        client.send()
+        self.assertEqual(0, len(temp))
+        self.assertEqual(1, len(client._batches))
         self.assertEqual(0, len(client._dataset))
         self.assertEqual(1, dummy.calls)
         self.assertTrue(dummy.lastUrl.endswith("/imports"))
