@@ -12,6 +12,11 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 12/28/15 - v0.9.1
+- **IMPORTANT**: The client now correctly tracks batches it has seen before
+so subsequent calls to `send()` do not send nothing.
+- Documentation fixes
+
 ### 12/16/15 - v0.9.0
 - Adding data should now be done via the new `iobeam.createDataStore(columns)` method,
 which allows you to track multiple streams of data in one object.
@@ -25,7 +30,7 @@ update as soon as possible to avoid breakage.
 - bugfix: device ids are no longer allowed to be non-strings when registering
 
 ### 10/20/15 - v0.7.0
-- *IMPORTANT*: previously sent data points were being kept and sent on subsequent sends, this
+- **IMPORTANT**: previously sent data points were being kept and sent on subsequent sends, this
 has been fixed
 - Query assumes time values given in to/from are same unit as when it is initialized
 
