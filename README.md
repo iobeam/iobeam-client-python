@@ -163,7 +163,7 @@ streams into "stores", a collection of data streams grouped together. You
 create a `iobeam.DataStore` with a list of stream names that it contains.
 So if you're tracking just temperature in a store called `conditions`:
 ```python
-conditions = iobeam.createDataStore(["temperature"])
+conditions = iobeamClient.createDataStore(["temperature"])
 ```
 
 Then for every data point, you'll want to add it to the store:
@@ -181,7 +181,7 @@ The `iobeam.DataStore` object can hold several streams at once. For
 example, if you also had a `getHumidity()` function, you could track both in
 the same `DataStore`:
 ```python
-conditions = iobeam.createDataStore(["temperature", "humidity"])
+conditions = iobeamClient.createDataStore(["temperature", "humidity"])
 
 now = ... # current time
 temp = getTemperature()
@@ -247,7 +247,7 @@ PROJECT_TOKEN = ... # String
 builder = iobeam.ClientBuilder(PROJECT_ID, PROJECT_TOKEN) \
                 .saveToDisk().registerDevice()
 iobeamClient = builder.build()
-conditions = iobeam.createDataStore(["temperature", "humidity"])
+conditions = iobeamClient.createDataStore(["temperature", "humidity"])
 
 ...
 
