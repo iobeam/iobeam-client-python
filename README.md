@@ -238,7 +238,6 @@ from iobeam import iobeam
 import time
 
 # Constants initialization
-PATH = ... # Can be None if you don't want to persist device_id to disk
 PROJECT_ID = ... # int
 PROJECT_TOKEN = ... # String
 
