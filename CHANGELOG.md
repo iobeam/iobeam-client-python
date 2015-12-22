@@ -12,7 +12,10 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
-### 12/28/15 - v0.9.1
+### 12/22/15 - v0.9.2
+- `registerOrSetId()` now accepts optional `deviceName` argument
+
+### 12/18/15 - v0.9.1
 - **IMPORTANT**: The client now correctly tracks batches it has seen before
 so subsequent calls to `send()` do not send nothing.
 - Documentation fixes

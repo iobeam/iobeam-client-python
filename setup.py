@@ -12,7 +12,7 @@ from codecs import open
 import sys
 import pypandoc
 
-VERSION = '0.9.1'
+VERSION = '0.9.2'
 
 #converts markdown to reStructured
 long_description = pypandoc.convert('CHANGELOG.md', 'rst', format='markdown')
