@@ -53,17 +53,29 @@ class ClientBuilder(object):
         self._deviceId = deviceId
         return self
 
-    def registerOrSetId(self, deviceId):
+    def _setRegArgs(self, deviceId, deviceName, setOnDupe):
+        """Set registration args.
+
+        Params:
+            deviceId - Desired device id; if None, server generated.
+            deviceName - Desired device name; if None, server generated.
+            setOnDupe - Whether "already registered" errors should be ignored
+        """
+        if deviceId is not None or setOnDupe:
+            utils.checkValidDeviceId(deviceId)
+        self._regArgs = (deviceId, deviceName, setOnDupe)
+
+    def registerOrSetId(self, deviceId, deviceName=None):
         """Client object should register itself, or set the id if it exists.
 
         Params:
             deviceId - Desired device id to register or set if it exists
+            deviceName - Desired device name (optional)
 
         Returns:
             This Builder object, for chaining.
         """
-        utils.checkValidDeviceId(deviceId)
-        self._regArgs = (deviceId, None, True)
+        self._setRegArgs(deviceId, deviceName, True)
         return self
 
 
@@ -77,9 +89,7 @@ class ClientBuilder(object):
         Returns:
             This Builder object, for chaining.
         """
-        if deviceId is not None:
-            utils.checkValidDeviceId(deviceId)
-        self._regArgs = (deviceId, deviceName, False)
+        self._setRegArgs(deviceId, deviceName, False)
         return self
 
     def setBackend(self, baseUrl):
