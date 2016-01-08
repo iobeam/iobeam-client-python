@@ -10,12 +10,16 @@ from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
 import sys
-import pypandoc
 
-VERSION = '0.9.2'
+VERSION = '0.9.4'
 
 #converts markdown to reStructured
-long_description = pypandoc.convert('CHANGELOG.md', 'rst', format='markdown')
+long_description = ""
+try:
+    with open("CHANGELOG.rst", "r") as f:
+        long_description = f.read()
+except:
+    pass
 
 install_requires = ['requests', 'pyjwt']
 if "--python-tag" in sys.argv:

@@ -12,6 +12,9 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 01/08/16 - v0.9.4
+- Remove accidental dependency on pypandoc when installing from sources
+
 ### 12/22/15 - v0.9.2
 - `registerOrSetId()` now accepts optional `deviceName` argument
 
