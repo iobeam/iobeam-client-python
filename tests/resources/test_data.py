@@ -146,7 +146,7 @@ class TestDataStore(unittest.TestCase):
             except ValueError:
                 pass
 
-        cases = [None, []]
+        cases = [None, [], ["time", "col"], ["time_offset", "col"]]
         for c in cases:
             verify(c)
 

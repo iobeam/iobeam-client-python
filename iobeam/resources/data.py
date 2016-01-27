@@ -144,12 +144,18 @@ class DataStore(object):
             fields - Column or series names for data in this batch.
 
         Raises:
-            ValueError - If `fields` is None, empty, or not a list.
+            ValueError - If `columns` is None, empty, or not a list. Also, if
+            it contains reserved names: time, time_offset.
         """
         if columns is None or len(columns) == 0:
             raise ValueError("columns cannot be None or empty")
         if not isinstance(columns, list):
             raise ValueError("columns must be a list of strings")
+        if "time" in columns:
+            raise ValueError("'time' is a reserved column name")
+        if "time_offset" in columns:
+            raise ValueError("'time_offset' is a reserved column name")
+
         self._columns = list(columns)  # defensive copy
         self._rows = []
 
