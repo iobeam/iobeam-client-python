@@ -12,6 +12,9 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 01/26/16 - v0.9.5
+- Raise `ValueError` if `DataStore` contains reserved column names: time, time_offset
+
 ### 01/08/16 - v0.9.4
 - Remove accidental dependency on pypandoc when installing from sources
 
