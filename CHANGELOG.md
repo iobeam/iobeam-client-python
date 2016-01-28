@@ -12,6 +12,9 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 01/28/16 - v0.9.7
+- Rejects reserved column names, case-insensitive
+
 ### 01/27/16 - v0.9.6
 - Add additional reserved column name: 'all'
 - Fix error with when manually adding `DataStore` to a client (not recommended)

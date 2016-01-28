@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 from codecs import open
 import sys
 
-VERSION = '0.9.6'
+VERSION = '0.9.7'
 
 #converts markdown to reStructured
 long_description = ""
@@ -42,7 +42,7 @@ setup(
     version=VERSION,
 
     description='Library for connecting to iobeam, the data analysis \
-    platform for the Internet of Things.',
+    platform for the Internet of Things (IoT).',
     long_description=long_description,
 
     # The project's main homepage.
