@@ -12,6 +12,10 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 01/27/16 - v0.9.6
+- Add additional reserved column name: 'all'
+- Fix error with when manually adding `DataStore` to a client (not recommended)
+
 ### 01/26/16 - v0.9.5
 - Raise `ValueError` if `DataStore` contains reserved column names: time, time_offset
 
