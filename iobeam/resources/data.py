@@ -154,7 +154,7 @@ class DataStore(object):
         if not isinstance(columns, list):
             raise ValueError("columns must be a list of strings")
         for name in DataStore._RESERVED_NAMES:
-            if name in columns:
+            if name in [c.lower() for c in columns]:
                 raise ValueError("'{}' is a reserved column name".format(name))
 
         self._columns = list(columns)  # defensive copy
