@@ -137,6 +137,8 @@ class DataPoint(object):
 class DataStore(object):
     """A collection of data streams with rows batched by time."""
 
+    _RESERVED_NAMES = ["time", "time_offset", "all"]
+
     def __init__(self, columns):
         """Construct a new DataStore object with given columns.
 
@@ -151,10 +153,9 @@ class DataStore(object):
             raise ValueError("columns cannot be None or empty")
         if not isinstance(columns, list):
             raise ValueError("columns must be a list of strings")
-        if "time" in columns:
-            raise ValueError("'time' is a reserved column name")
-        if "time_offset" in columns:
-            raise ValueError("'time_offset' is a reserved column name")
+        for name in DataStore._RESERVED_NAMES:
+            if name in columns:
+                raise ValueError("'{}' is a reserved column name".format(name))
 
         self._columns = list(columns)  # defensive copy
         self._rows = []
