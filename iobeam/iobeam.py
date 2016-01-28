@@ -168,13 +168,14 @@ class _Client(object):
     # pylint: enable=too-many-arguments
 
     def _checkToken(self):
+        """Check if token is expired, and refresh if necessary."""
         if utils.isExpiredToken(self.projectToken):
             newToken = self._refreshToken()
             if newToken is not None:
                 self.projectToken = newToken
 
-
     def _refreshToken(self):
+        """Refresh expired project token."""
         return self._tokenService.refreshToken(self.projectToken)
 
     def registerDevice(self, deviceId=None, deviceName=None, setOnDupe=False):
@@ -323,14 +324,13 @@ class _Client(object):
         if store is None:
             utils.getLogger().warning("adding store was None")
             return
-        elif not isinstance(batch, data.DataStore):
+        elif not isinstance(store, data.DataStore):
             raise ValueError("store must be a DataStore")
-        elif len(store) == 0:
-            return
 
         self._batches.append(store)
 
     def _convertDataSetToBatches(self):
+        """Convert legacy format into new table format."""
         dataset = self._dataset
         batches = []
         for name in dataset:

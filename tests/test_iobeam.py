@@ -360,6 +360,15 @@ class TestClient(unittest.TestCase):
         # 2: 'fields' and 'data', batch format
         self.assertEqual(2, len(dummy.lastJson["sources"]))
 
+    def test_addDataStore(self):
+        dummy = DummyBackend()
+        backend = request.DummyRequester(dummy)
+        client = self._makeTempClient(backend=backend, deviceId="fake")
+
+        ds = data.DataStore(["col_test"])
+        client.addDataStore(ds)
+        self.assertEqual(1, len(client._batches))
+
     def test_sendWithBatch(self):
         dummy = DummyBackend()
         backend = request.DummyRequester(dummy)
