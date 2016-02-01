@@ -122,7 +122,7 @@ class TestDeviceService(unittest.TestCase):
             self.assertTrue(False)
         except request.Error as e:
             self.assertEqual(2, dummy.calls)
-            self.assertEqual("Received unexpected code: 422", str(e))
+            self.assertTrue(str(e).startswith("Received unexpected code: 422"))
 
     def test_registerBadToken(self):
         registerReturn = (_NONE_DEVICE_ID, _NONE_DEVICE_NAME)
