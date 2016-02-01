@@ -12,6 +12,10 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 02/01/16 - v0.10.0
+- Error messages from the server are now included in stacktrace output
+- Errors during refreshing tokens now raise an `UnknownCodeError`
+
 ### 01/28/16 - v0.9.7
 - Rejects reserved column names, case-insensitive
 
