@@ -79,7 +79,6 @@ class DeviceService(service.EndpointService):
         elif r.getApiErrorCode() == request.ERROR_CODE_DUPLICATE_DEVICE_ID:
             raise DuplicateIdError()
         else:
-            raise request.Error(
-                    "Received unexpected code: {}".format(r.getResponseCode()))
+            self.raiseUnknownCodeError(r)
 
         return ret

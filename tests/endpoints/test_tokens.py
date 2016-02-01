@@ -33,6 +33,7 @@ class TestDeviceService(unittest.TestCase):
         dummy = DummyBackend()
         service = TokenService(requester=request.DummyRequester(dummy))
 
-        ret = service.refreshToken(_OLD_TOKEN[:2])
-        self.assertTrue(ret is None)
-        self.assertEqual(1, dummy.calls)
+        try:
+            ret = service.refreshToken(_OLD_TOKEN[:2])
+        except request.UnknownCodeError:
+            self.assertEqual(1, dummy.calls)

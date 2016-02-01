@@ -19,7 +19,10 @@ class TokenService(service.EndpointService):
             oldToken - Previous project token to refresh
 
         Returns:
-            Refreshed project token (string), or None if an error occurs.
+            Refreshed project token (string).
+
+        Raises:
+            UnknownCodeError if an error response is returned by server.
         """
         utils.checkValidProjectToken(oldToken)
         endpoint = self.makeEndpoint("tokens/project")
@@ -31,4 +34,4 @@ class TokenService(service.EndpointService):
         if r.getResponseCode() == 200:
             return r.getResponse()["token"]
         else:
-            return None
+            raise request.UnknownCodeError(r)

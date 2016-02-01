@@ -18,3 +18,6 @@ class EndpointService(object):
     def makeEndpoint(self, endpoint):
         """Create a string of the full API endpoint"""
         return self._requester.makeEndpoint(endpoint)
+
+    def raiseUnknownCodeError(self, req):
+        raise request.UnknownCodeError(req)

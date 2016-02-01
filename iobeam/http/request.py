@@ -42,6 +42,12 @@ class Error(Exception):
     def __init__(self, value):
         Exception.__init__(self, value)
 
+class UnknownCodeError(Error):
+
+    def __init__(self, req):
+        Error.__init__(self, "Received unexpected code: {}\nDetails: {}".format(
+            req.getResponseCode(), str(req.getApiError())))
+
 class Request(object):
     """Wrapper for an HTTP request object."""
 
@@ -99,6 +105,20 @@ class Request(object):
     def getResponseCode(self):
         """Return HTTP status code for a given request."""
         return self.resp.status_code
+
+    def getApiError(self):
+        """Return iobeam API error.
+
+        Returns:
+            The JSON error or None otherwise.
+        """
+        if self.resp is None:
+            return None
+        try:
+            msg = self.resp.json()
+            return msg["errors"][0]
+        except Exception:
+            return None
 
     def getApiErrorCode(self):
         """Return iobeam API error code.

@@ -6,7 +6,7 @@ _BASE_URL = "https://api-dev.iobeam.com/v1/"
 
 UnauthorizedError = request.UnauthorizedError
 Error = request.Error
-
+UnknownCodeError = request.UnknownCodeError
 
 '''
 Basic dummy request factory.
