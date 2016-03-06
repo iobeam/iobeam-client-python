@@ -67,6 +67,8 @@ class TestUtilsFuncs(unittest.TestCase):
         verify(None, "deviceId must be a string")
         verify(1, "deviceId must be a string")
         verify("", "deviceId must be more than 0 characters")
+        verify("no.periods", "deviceId can only include a-z, A-Z, 0-9, _, :, and -")
+        verify("no\"quotes", "deviceId can only include a-z, A-Z, 0-9, _, :, and -")
 
         # Should be valid
         utils.checkValidDeviceId("valid")

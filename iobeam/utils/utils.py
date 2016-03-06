@@ -1,6 +1,7 @@
 """Common utility functions."""
 import jwt
 import logging
+import re
 import sys
 import time
 
@@ -74,6 +75,10 @@ def checkValidDeviceId(deviceId):
                      (c) is of length 0.
     """
     __checkNon0LengthString(deviceId, "deviceId")
+    pattern = re.compile("^[a-zA-Z0-9_:-]+$")
+    if not pattern.match(deviceId):
+        raise ValueError("deviceId can only include a-z, A-Z, 0-9, _, :, and -")
+
 
 def checkValidProjectToken(token):
     """Check that a token is valid: string of len > 0
