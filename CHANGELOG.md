@@ -12,6 +12,10 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 03/07/16 - v0.10.1
+- Library checks that device ID is valid with regex `[a-zA-Z0-9:_-]+` instead of error
+from server
+
 ### 02/01/16 - v0.10.0
 - Error messages from the server are now included in stacktrace output
 - Errors during refreshing tokens now raise an `UnknownCodeError`
