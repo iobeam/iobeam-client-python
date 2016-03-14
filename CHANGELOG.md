@@ -12,6 +12,9 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 03/14/16 - v0.10.2
+- Check that series names are not empty strings
+
 ### 03/07/16 - v0.10.1
 - Library checks that device ID is valid with regex `[a-zA-Z0-9:_-]+` instead of error
 from server
