@@ -56,7 +56,7 @@ class Timestamp(object):
         elif self._type == TimeUnit.MILLISECONDS:
             return self._value
         elif self._type == TimeUnit.SECONDS:
-            return (self._value * 1000)
+            return self._value * 1000
 
     def asMicroseconds(self):
         """This timestamp value represented in microseconds.
@@ -137,8 +137,6 @@ class DataPoint(object):
 class DataStore(object):
     """A collection of data streams with rows batched by time."""
 
-    _RESERVED_NAMES = ["time", "time_offset", "all"]
-
     def __init__(self, columns):
         """Construct a new DataStore object with given columns.
 
@@ -153,9 +151,8 @@ class DataStore(object):
             raise ValueError("columns cannot be None or empty")
         if not isinstance(columns, list):
             raise ValueError("columns must be a list of strings")
-        for name in DataStore._RESERVED_NAMES:
-            if name in [c.lower() for c in columns]:
-                raise ValueError("'{}' is a reserved column name".format(name))
+        for c in columns:
+            utils.checkValidSeriesName(c)
 
         self._columns = list(columns)  # defensive copy
         self._rows = []

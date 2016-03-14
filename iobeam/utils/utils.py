@@ -67,6 +67,22 @@ def __checkNon0LengthString(value, valueName):
     elif len(value) == 0:
         raise ValueError("{} must be more than 0 characters".format(valueName))
 
+__RESERVED_COL_NAMES = ["time", "time_offset", "all"]
+
+def checkValidSeriesName(name):
+    """Check that a series name is valid.
+
+    A valid series name is not reserved by iobeam (time, time_offset, all) and
+    a non-0 length string.
+
+    Raises:
+        ValueError - If `name` is (a) None, (b) not a string/unicode, (c)
+                     is of length 0, or (d) reserved.
+    """
+    __checkNon0LengthString(name, "columns")
+    if name.lower() in __RESERVED_COL_NAMES:
+        raise ValueError("'{}' is a reserved column name".format(name))
+
 def checkValidDeviceId(deviceId):
     """Check that a deviceId is valid: string of len > 0
 
@@ -92,6 +108,8 @@ def checkValidProjectToken(token):
 __LOGGER = None
 
 def getLogger():
+    """Get the logger for this library."""
+
     global __LOGGER
     if __LOGGER is not None:
         logger = __LOGGER
