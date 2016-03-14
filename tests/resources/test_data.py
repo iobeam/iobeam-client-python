@@ -154,7 +154,8 @@ class TestDataStore(unittest.TestCase):
             ["time_offset", "col"],
             ["col", "TIME_OFfset"],
             ["all"],
-            ["AlL"]
+            ["AlL"],
+            ["fine", ""]
         ]
         for c in cases:
             verify(c)
