@@ -33,7 +33,8 @@ def isExpiredToken(projectToken):
     checkValidProjectToken(projectToken)
     opts = {"verify_signature": False, "verify_exp": False}
     try:
-        decoded = jwt.decode(projectToken, '', options=opts)
+        decoded = jwt.decode(projectToken.replace("+", "-").replace("/", "_"),
+                             "", options=opts)
     except jwt.DecodeError:
         raise ValueError("invalid jwt token")
     exp = int(decoded["exp"]) * 1000
