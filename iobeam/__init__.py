@@ -11,4 +11,5 @@ QueryReq = iobeam.QueryReq
 
 # pylint:disable=invalid-name
 makeQuery = iobeam.makeQuery
+fetchDeviceToken = iobeam.fetchDeviceToken
 # pylint:enable=invalid-name

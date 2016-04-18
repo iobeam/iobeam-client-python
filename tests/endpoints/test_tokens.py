@@ -20,6 +20,32 @@ class TestDeviceService(unittest.TestCase):
         self.assertTrue(service.requester() is not None)
         self.assertTrue(isinstance(service.requester(), request.DummyRequester))
 
+    def test_getProjectToken(self):
+        dummy = DummyBackend()
+        service = TokenService(requester=request.DummyRequester(dummy))
+        opts = {"device_id": "python-test", "refreshable": False}
+        ret = service.getProjectToken("token", 1, duration="1d", options=opts)
+        self.assertTrue(ret is not None)
+        for o in opts:
+            self.assertEqual(opts[o], ret[o])
+        self.assertEqual("1d", ret["duration"])
+        self.assertEqual(1, dummy.calls)
+
+    def test_getProjectTokenWrong(self):
+        def check(duration, opts):
+            try:
+                ret = service.getProjectToken("token", 1, duration=duration,
+                    options=opts)
+                self.assertTrue(False)
+            except ValueError:
+                pass
+        dummy = DummyBackend()
+        service = TokenService(requester=request.DummyRequester(dummy))
+
+        check("5q", None)  # not a valid unit
+        check("aw", None)  # not a valid number
+        check(None, "not a dict")
+
     def test_refreshToken(self):
         dummy = DummyBackend()
         service = TokenService(requester=request.DummyRequester(dummy))

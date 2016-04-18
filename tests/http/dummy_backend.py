@@ -10,6 +10,7 @@ if utils.IS_PY3:
 
 
 AUTH = "Authorization"
+USER_TOKEN = "userdummy"
 TOKEN = "dummy"
 NEW_TOKEN = "newdummy"
 _STATUS_CODE = "status_code"
@@ -38,8 +39,10 @@ class DummyBackend(request.DummyRequest):
         self.lastJson = json
         self.calls += 1
 
-        if url.endswith("/tokens/project"):
+        if url.endswith("/tokens/project") and self.method == "POST":
             return Resp(self.refreshToken(self.body["refresh_token"]))
+        elif url.endswith("/tokens/project"):
+            return Resp(self.newProjectToken(params))
 
         if AUTH not in headers or (headers[AUTH] != "Bearer {}".format(TOKEN)):
             return Resp({
@@ -68,6 +71,30 @@ class DummyBackend(request.DummyRequest):
             return {_STATUS_CODE: 200, "token": NEW_TOKEN}
         else:
             return {_STATUS_CODE: 401, "message": "bad token"}
+
+    def newProjectToken(self, params):
+        read = params.get("read", True)
+        write = params.get("write", True)
+        admin = params.get("admin", True)
+
+        # Instead of the string, we pass a JSON object to confirm
+        # params are being passed correctly
+        token = {"read": read, "write": write, "admin": admin}
+        ret = {
+            _STATUS_CODE: 200,
+            "token": token,
+            "read": read,
+            "write": write,
+            "admin": admin
+        }
+        if "duration" in params:
+            token["duration"] = params.get("duration")
+        if "refreshable" in params:
+            token["refreshable"] = params.get("refreshable")
+        if "device_id" in params:
+            token["device_id"] = params.get("device_id")
+
+        return ret
 
     def getTimestamp(self):
         return {

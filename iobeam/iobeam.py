@@ -401,8 +401,48 @@ class _Client(object):
         service = exports.ExportService(token, requester=requester)
         return service.getData(qry)
 
+    @staticmethod
+    def fetchToken(userToken, projectId, duration=None, options=None,
+                   backend=None):
+        """Fetch a token for the given parameters."""
+        if userToken is None:
+            raise ValueError("userToken cannot be None")
+        requester = None
+        if backend is not None:
+            requester = request.Requester(baseUrl=backend)
 
-# Alias
+        service = tokens.TokenService(requester=requester)
+        return service.getProjectToken(userToken, projectId,
+                                       duration=duration, options=options)
+
+# Aliases
 def makeQuery(token, qry, backend=None):
     """Perform iobeam query."""
     return _Client.query(token, qry, backend)
+
+def fetchDeviceToken(userToken, projectId, deviceId, duration=None,
+                     options=None, backend=None):
+    """Fetch a token specifically for a device.
+
+    Params:
+        userToken - User token to authenticate to iobeam
+        projectId - Project ID to which the device belongs
+        deviceId - Device ID to make the token for
+        duration - Specification of how long the token is valid for, in
+                   form <num><unit> where unit is (w)eeks, (d)ays, (h)ours,
+                   (m)inutes, or (s)econds. Example: 5w = 5 weeks.
+                   Optional, with a default of None (standard token
+                   validity period).
+        options - Additional options for the token passed as a dict. Options
+                  include permissions (booleans, named "read", "write",
+                  "admin") or if refreshable (boolean, "refreshable").
+    Returns:
+        JSON web token string of the token.
+    """
+    if options is not None:
+        paramOptions = options.copy()
+    else:
+        paramOptions = {}
+    paramOptions["device_id"] = deviceId
+    return _Client.fetchToken(userToken, projectId, duration=duration,
+                              options=options, backend=backend)

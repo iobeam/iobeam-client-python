@@ -1,5 +1,6 @@
 """Classes used when communicating via HTTP to the iobeam backend."""
 import requests
+from iobeam.utils import utils
 
 ERROR_CODE_DUPLICATE_DEVICE_ID = 150
 
@@ -91,7 +92,7 @@ class Request(object):
             self.resp = self._session.post(self.url, params=self.params,
                                            headers=self.headers, json=self.body)
         else:
-            print("unsupported method")
+            utils.getLogger().warning("UNSUPPORTED METHOD: {}", self.method)
 
     def getResponse(self):
         """Return response body for a given request."""
