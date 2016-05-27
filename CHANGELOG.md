@@ -12,6 +12,9 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 05/27/16 - v0.10.4
+- Fix publishing/build process to include all dependencies
+
 ### 03/24/16 - v0.10.3
 - Work with both base64 and base64url tokens
 
