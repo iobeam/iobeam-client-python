@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 from codecs import open
 import sys
 
-VERSION = '0.10.3'
+VERSION = '0.10.4'
 
 #converts markdown to reStructured
 long_description = ""
@@ -21,7 +21,7 @@ try:
 except:
     pass
 
-install_requires = ['requests', 'pyjwt']
+install_requires = ['requests', 'pyjwt', 'enum34']
 if "--python-tag" in sys.argv:
     i = 0
     while i < len(sys.argv):
@@ -30,10 +30,8 @@ if "--python-tag" in sys.argv:
         i += 1
     i += 1
     if i <= len(sys.argv):
-        if sys.argv[i] != "py35":
-            install_requires.append('enum34')
-else:
-    install_requires.append('enum34')
+        if sys.argv[i] == "py35":
+            install_requires = install_requires[0:-1]
 
 print(install_requires)
 setup(
