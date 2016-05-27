@@ -12,6 +12,9 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 03/24/16 - v0.10.3
+- Work with both base64 and base64url tokens
+
 ### 03/14/16 - v0.10.2
 - Check that series names are not empty strings
 

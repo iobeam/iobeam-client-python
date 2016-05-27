@@ -32,7 +32,10 @@ if "--python-tag" in sys.argv:
     if i <= len(sys.argv):
         if sys.argv[i] != "py35":
             install_requires.append('enum34')
+else:
+    install_requires.append('enum34')
 
+print(install_requires)
 setup(
     name='iobeam',
 
