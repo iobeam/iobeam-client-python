@@ -4,3 +4,4 @@ build*
 dist*
 iobeam_device_id
 iobeam.egg-info/*
+CHANGELOG.rst
