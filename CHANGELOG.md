@@ -12,6 +12,9 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 06/01/16 - v0.10.5
+- Clients will reuse HTTP connections more intelligently
+
 ### 05/27/16 - v0.10.4
 - Fix publishing/build process to include all dependencies
 
