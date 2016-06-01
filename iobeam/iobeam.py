@@ -101,7 +101,7 @@ class ClientBuilder(object):
         Returns:
             This Builder object, for chaining.
         """
-        self._backend = request.Requester(baseUrl=baseUrl)
+        self._backend = request.getRequester(url=baseUrl)
         return self
 
     def build(self):
@@ -396,7 +396,7 @@ class _Client(object):
             raise ValueError("qry must be a iobeam.QueryReq")
         requester = None
         if backend is not None:
-            requester = request.Requester(baseUrl=backend)
+            requester = request.getRequester(url=backend)
 
         service = exports.ExportService(token, requester=requester)
         return service.getData(qry)
@@ -409,7 +409,7 @@ class _Client(object):
             raise ValueError("userToken cannot be None")
         requester = None
         if backend is not None:
-            requester = request.Requester(baseUrl=backend)
+            requester = request.getRequester(url=backend)
 
         service = tokens.TokenService(requester=requester)
         return service.getProjectToken(userToken, projectId,

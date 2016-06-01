@@ -4,10 +4,11 @@ from iobeam.utils import utils
 
 ERROR_CODE_DUPLICATE_DEVICE_ID = 150
 
+_BASE_URL = "https://api.iobeam.com/v1/"
+
+
 class Requester(object):
     """Generates HTTP requests using `requests` library."""
-
-    _BASE_URL = "https://api.iobeam.com/v1/"
 
     def __init__(self, baseUrl=_BASE_URL):
         self._baseUrl = baseUrl
@@ -24,6 +25,16 @@ class Requester(object):
     def post(self, url):
         """Return a base POST request for a given URL."""
         return Request("POST", url, self._session)
+
+
+_REQUESTERS = {_BASE_URL: Requester()}
+
+def getRequester(url=None):
+    if url is None:
+        return _REQUESTERS[_BASE_URL]
+    if url not in _REQUESTERS:
+        _REQUESTERS[url] = Requester(baseUrl=url)
+    return _REQUESTERS[url]
 
 
 class UnauthorizedError(Exception):
