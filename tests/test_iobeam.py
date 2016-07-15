@@ -369,6 +369,18 @@ class TestClient(unittest.TestCase):
         client.addDataStore(ds)
         self.assertEqual(1, len(client._batches))
 
+    def test_createDataStoreWithSameCols(self):
+        dummy = DummyBackend()
+        backend = request.DummyRequester(dummy)
+        client = self._makeTempClient(backend=backend, deviceId="fake")
+
+        ds = client.createDataStore(["col1", "col2", "col3"])
+        self.assertEqual(1, len(client._batches))
+        ds2 = client.createDataStore(["col3", "col1", "col2"])
+        self.assertEqual(1, len(client._batches))
+        self.assertEqual(ds, ds2)
+
+
     def test_sendWithBatch(self):
         dummy = DummyBackend()
         backend = request.DummyRequester(dummy)

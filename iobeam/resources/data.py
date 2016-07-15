@@ -210,6 +210,16 @@ class DataStore(object):
             ret.append(r.copy())
         return ret
 
+    def hasSameColumns(self, cols):
+        """Check if this datastore has exactly a list of columns."""
+        if cols is None or not isinstance(cols, list):
+            return False
+        elif len(cols) != len(self._columns):
+            return False
+        else:
+            return set(cols) == set(self._columns)
+
+
     def split(self, chunkSize):
         """Split a store into multiple batches with `chunkSize` rows.
 

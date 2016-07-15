@@ -203,6 +203,21 @@ class TestDataStore(unittest.TestCase):
         for (t, d) in cases:
             verify(t, d)
 
+    def test_hasSameColumns(self):
+        columns = ["a", "b", "c"]
+        ds = data.DataStore(columns)
+        cases = [
+            (["c", "b", "a"], True),
+            (["b", "c", "a"], True),
+            (["a"], False),
+            (["a", "b", "d"], False),
+            (["a", "b", "b"], False),
+            ("abc", False)
+        ]
+
+        for c, res in cases:
+            self.assertEqual(ds.hasSameColumns(c), res)
+
     def test_split(self):
         columns = ["a", "b", "c"]
         ds = data.DataStore(columns)

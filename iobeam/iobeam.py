@@ -310,6 +310,10 @@ class _Client(object):
             DataStore object with those columns and being tracked
             by this client for sending.
         """
+        for store in self._batches:
+            if store.hasSameColumns(columns):
+                return store
+
         ds = data.DataStore(columns)
         self._batches.append(ds)
 
