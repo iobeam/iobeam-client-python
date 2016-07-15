@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 from codecs import open
 import sys
 
-VERSION = '0.10.5'
+VERSION = '0.11.0'
 
 #converts markdown to reStructured
 long_description = ""

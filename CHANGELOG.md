@@ -12,6 +12,10 @@ to generate a valid token and use our APIs.
 
 ## Changelog
 
+### 07/15/16 - v0.11.0
+- Client will reuse a DataStore with the same columns when using `createDataStore` if 
+it exists (rather than create a duplicate)
+
 ### 06/01/16 - v0.10.5
 - Clients will reuse HTTP connections more intelligently
 
