@@ -49,7 +49,7 @@ Then make sure that the `iobeam` folder is in your `PYTHONPATH`.
 
 ## Overview
 
-This library allows Python clients to send and query data to the
+This library allows Python clients to send data to the
 iobeam backend.
 
 At a high-level, here's how it works:
@@ -68,8 +68,6 @@ one object.
 1. Add data values to your `iobeam.DataStore` objects.
 
 1. When you're ready, send your data to the iobeam backend
-
-1. Optionally, you can use this library to retrieve your data.
 
 
 ## Getting Started
@@ -264,93 +262,6 @@ conditions.add(ts, {"temperature": temp, "humidity": humidity})
 # Data transmission
 iobeamClient.send()
 ```
-
-## Retrieving Data
-
-Once you've sent data to the iobeam backend, you may want to query it and
-process it. To do that, you'll need to create an `iobeam.QueryReq`, which is
-composed of three parts: a project id, a device name (optional), and a series
-name (optional). If a series name is not given, all series for that device are
-retrieved. If a device name is not given, all devices will be queried.
-
-In the simplest form, here is how you make a few different queries:
-```python
-# all series from all devices in project PROJECT_ID
-q = iobeam.QueryReq(PROJECT_ID)
-
-# all series from device DEVICE_ID in project PROJECT_ID
-q = iobeam.QueryReq(PROJECT_ID, deviceId=DEVICE_ID)
-
-# series "temp" from device DEVICE_ID in project PROJECT_ID
-q = iobeam.QueryReq(PROJECT_ID, deviceId=DEVICE_ID, seriesName="temp")
-```
-
-Then to actually execute the query:
-```python
-# token is a project token with read access
-res = iobeam.makeQuery(token, q)
-```
-
-Your result will look something like this:
-
-    { "result": [
-        {
-            "project_id": "<PROJECT_ID>",
-            "device_id": "<DEVICE_ID>",
-            "name": "temp",
-            "data": [
-                {
-                    "time":  1427316488000,
-                    "value": 22.23
-                },
-                {
-                    "time":  1427316489000,
-                    "value": 22.22
-                }, ...
-            ]
-        }, ...
-      ],
-      "timefmt": "msec"
-    }
-
-
-### Adjusting Your Query
-
-You can modify your with several parameters, such as `to` and `from` and limits
-on the values you're interested in:
-```python
-# start with this basic query
-q = iobeam.QueryReq(PROJECT_ID, deviceId=DEVICE_ID, seriesName="temp")
-
-# Last 5 results after a given START:
-q = q.limit(5).fromTime(START)
-
-# All results between two times, START and END
-q = q.fromTime(START).toTime(END)
-# OR...
-q = q.inTimeRange(START, END)
-
-# All results where the value is greater than 0
-q = q.greaterThan(0)
-```
-
-By default, time values are treated as milliseconds. If you'd like to
-use a different (seconds or microseconds) you can initialize the
-query like this:
-```python
-q = iobeam.QueryReq(PROJECT_ID, timeUnit=iobeam.TimeUnit.MICROSECONDS)
-```
-
-The full list of (chainable) parameters:
-
-    limit(limit)
-    fromTime(time)
-    toTime(time)
-    inTimeRange(startTime, endTime)  # combines previous two
-    greaterThan(value)
-    lessThan(value)
-    inValueRange(min, max)  # combines previous two
-    equals(value)
 
 
 ## Running tests
